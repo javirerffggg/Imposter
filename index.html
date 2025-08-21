@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imposter Who? - Versión Offline</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#06b6d4">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #111827; color: #f9fafb; }
+    .screen { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="setup-screen" class="screen">
+    <div class="max-w-md w-full bg-gray-800 p-6 rounded-xl shadow-lg">
+      <h1 class="text-3xl font-bold mb-4 text-cyan-400">Imposter Who? (Offline)</h1>
+      <p class="mb-4 text-gray-300">Configura la partida:</p>
+
+      <!-- Jugadores -->
+      <div class="mb-4">
+        <input id="player-input" class="w-2/3 p-2 rounded bg-gray-700" placeholder="Nombre jugador">
+        <button id="add-player" class="p-2 bg-cyan-400 text-black font-bold rounded">Añadir</button>
+        <div id="players-list" class="mt-2 text-sm text-gray-200"></div>
+      </div>
+
+      <!-- Categorías -->
+      <div class="mb-4">
+        <label class="block mb-2">Categorías:</label>
+        <div id="category-list" class="grid grid-cols-2 gap-2"></div>
+      </div>
+
+      <button id="start-btn" class="w-full p-3 bg-green-500 font-bold rounded disabled:bg-gray-600" disabled>Asignar Roles</button>
+    </div>
+  </div>
+
+  <div id="roles-screen" class="screen hidden">
+    <div class="max-w-md w-full bg-gray-800 p-6 rounded-xl shadow-lg text-center">
+      <h2 id="current-player" class="text-2xl font-bold mb-4"></h2>
+      <p id="role-info" class="mb-4 text-lg"></p>
+      <button id="next-btn" class="w-full p-3 bg-blue-500 rounded font-bold">Siguiente</button>
+    </div>
+  </div>
+
+  <div id="reveal-screen" class="screen hidden">
+    <div class="max-w-md w-full bg-gray-800 p-6 rounded-xl shadow-lg text-center">
+      <h2 class="text-3xl font-bold mb-4">Revelación</h2>
+      <p id="reveal-text" class="mb-4"></p>
+      <button id="restart-btn" class="w-full p-3 bg-green-500 rounded font-bold">Nuevo Juego</button>
+    </div>
+  </div>
+
+  <script>
+    const LOCAL_WORD_CATEGORIES = {
+      "Animales": ["perro", "gato", "elefante", "jirafa", "tiburón", "águila", "conejo", "oso"],
+      "Comidas": ["pizza", "hamburguesa", "sopa", "ensalada", "arroz", "taco", "paella", "sushi"],
+      "Países": ["España", "Francia", "Italia", "México", "Japón", "Brasil", "Canadá", "Egipto"],
+      "Deportes": ["fútbol", "baloncesto", "tenis", "natación", "boxeo", "rugby", "golf", "ciclismo"],
+      "Películas": ["Titanic", "Avatar", "Matrix", "Frozen", "Shrek", "Rocky", "Gladiator", "Joker"]
+    };
+
+    let players = [];
+    let selectedCategory = null;
+    let secretWord = "";
+    let impostors = [];
+    let currentPlayerIndex = 0;
+
+    const setupScreen = document.getElementById("setup-screen");
+    const rolesScreen = document.getElementById("roles-screen");
+    const revealScreen = document.getElementById("reveal-screen");
+    const playersList = document.getElementById("players-list");
+    const categoryList = document.getElementById("category-list");
+    const startBtn = document.getElementById("start-btn");
+
+    Object.keys(LOCAL_WORD_CATEGORIES).forEach(cat => {
+      const div = document.createElement("div");
+      div.innerHTML = `<label class='flex items-center'><input type='radio' name='category' value='${cat}' class='mr-2'>${cat}</label>`;
+      categoryList.appendChild(div);
+    });
+
+    document.getElementById("add-player").onclick = () => {
+      const name = document.getElementById("player-input").value.trim();
+      if (name && !players.includes(name)) {
+        players.push(name);
+        document.getElementById("player-input").value = "";
+        renderPlayers();
+      }
+    };
+
+    function renderPlayers() {
+      playersList.innerHTML = players.map(p => `<div>${p}</div>`).join("");
+      startBtn.disabled = players.length < 3;
+    }
+
+    startBtn.onclick = () => {
+      const chosen = document.querySelector("input[name='category']:checked");
+      if (!chosen) { alert("Elige una categoría"); return; }
+      selectedCategory = chosen.value;
+      const words = LOCAL_WORD_CATEGORIES[selectedCategory];
+      secretWord = words[Math.floor(Math.random() * words.length)];
+      const impostorIndex = Math.floor(Math.random() * players.length);
+      impostors = [players[impostorIndex]];
+      currentPlayerIndex = 0;
+      showRoles();
+    };
+
+    function showRoles() {
+      setupScreen.classList.add("hidden");
+      rolesScreen.classList.remove("hidden");
+      const player = players[currentPlayerIndex];
+      document.getElementById("current-player").textContent = "Turno de " + player;
+      if (impostors.includes(player)) {
+        document.getElementById("role-info").textContent = "🤫 Eres el IMPOSTOR. ¡No conoces la palabra secreta!";
+      } else {
+        document.getElementById("role-info").textContent = `La palabra es: ${secretWord}`;
+      }
+    }
+
+    document.getElementById("next-btn").onclick = () => {
+      currentPlayerIndex++;
+      if (currentPlayerIndex < players.length) {
+        showRoles();
+      } else {
+        rolesScreen.classList.add("hidden");
+        revealScreen.classList.remove("hidden");
+        document.getElementById("reveal-text").textContent = `La palabra era "${secretWord}". El impostor era: ${impostors.join(", ")}`;
+      }
+    };
+
+    document.getElementById("restart-btn").onclick = () => {
+      players = [];
+      impostors = [];
+      secretWord = "";
+      selectedCategory = null;
+      document.querySelectorAll("input[name='category']").forEach(i => i.checked = false);
+      playersList.innerHTML = "";
+      setupScreen.classList.remove("hidden");
+      revealScreen.classList.add("hidden");
+    };
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js")
+        .then(() => console.log("Service Worker registrado"))
+        .catch(err => console.error("Error SW:", err));
+    }
+  </script>
+</body>
+</html>
