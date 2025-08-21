@@ -47,23 +47,12 @@
         .player-added-animation { animation: player-added 0.5s ease-out forwards; }
         @keyframes player-added { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
-        
-        /* Clases de colores para temas */
-        .bg-primary { background-color: var(--bg-primary); }
-        .bg-secondary { background-color: var(--bg-secondary); }
-        .bg-tertiary { background-color: var(--bg-tertiary); }
-        .bg-accent-primary { background-color: var(--accent-primary); }
-        .bg-accent-secondary { background-color: var(--accent-secondary); }
-        .bg-accent-danger { background-color: var(--accent-danger); }
-
-        .text-primary { color: var(--text-primary); }
-        .text-secondary { color: var(--text-secondary); }
-        .text-accent-primary { color: var(--accent-primary); }
-        .text-accent-secondary { color: var(--accent-secondary); }
-        .text-accent-danger { color: var(--accent-danger); }
-
+        .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); } .bg-tertiary { background-color: var(--bg-tertiary); }
+        .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
+        .accent-primary { color: var(--accent-primary); } .bg-accent-primary { background-color: var(--bg-accent-primary); }
         .border-accent-primary { border-color: var(--accent-primary); }
-        .ring-accent-primary { ring-color: var(--accent-primary); }
+        .accent-secondary { color: var(--accent-secondary); } .bg-accent-secondary { background-color: var(--accent-secondary); }
+        .accent-danger { color: var(--accent-danger); } .bg-accent-danger { background-color: var(--accent-danger); }
     </style>
 </head>
 <body>
@@ -72,7 +61,7 @@
     <div id="setup-screen" class="screen">
         <div class="w-full max-w-md text-center">
             <div class="flex items-center justify-center mb-4">
-                <h1 class="text-4xl sm:text-5xl font-bold text-accent-primary">Imposter Who?</h1>
+                <h1 class="text-4xl sm:text-5xl font-bold accent-primary">Imposter Who?</h1>
                 <button id="mute-btn" class="ml-4 p-2 bg-tertiary rounded-full hover:opacity-80 transition-opacity">
                     <svg id="music-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     <svg id="music-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -97,12 +86,12 @@
                         <select id="impostor-count" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary"></select>
                     </div>
                     <div>
-                        <label for="difficulty-select" class="block mb-2 text-sm font-medium text-secondary">Dificultad</label>
-                        <select id="difficulty-select" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary">
-                            <option value="random">Aleatoria</option>
-                            <option value="easy">Fácil</option>
-                            <option value="medium">Media</option>
-                            <option value="hard">Difícil</option>
+                        <label for="theme-select" class="block mb-2 text-sm font-medium text-secondary">Tema Visual</label>
+                        <select id="theme-select" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary">
+                            <option value="default">Oscuro (Default)</option>
+                            <option value="space">Espacial</option>
+                            <option value="fantasy">Fantasía</option>
+                            <option value="noir">Noir</option>
                         </select>
                     </div>
                 </div>
@@ -119,7 +108,6 @@
                 </div>
                 
                 <div class="text-left space-y-3 border-t border-gray-700 pt-4">
-                    <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="impostor-hint-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">💡 Pista para Impostores</span></label>
                     <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="troll-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">Modo Troll</span></label>
                     <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="detective-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">🕵️ Modo Detective</span></label>
                 </div>
@@ -141,6 +129,7 @@
                 </div>
                 <div class="card-face card-face-back absolute w-full h-full flex flex-col justify-center bg-secondary rounded-2xl shadow-lg p-6">
                     <div>
+                        <p class="text-sm accent-primary mb-2">Categoría: <span id="role-category"></span></p>
                         <h3 id="role-title" class="text-3xl sm:text-4xl font-bold mb-4"></h3>
                         <div id="role-word" class="text-2xl"></div>
                     </div>
@@ -153,11 +142,11 @@
     <!-- Pantalla de Juego en Curso -->
     <div id="in-game-screen" class="screen hidden">
         <div class="w-full max-w-md text-center">
-            <h2 class="text-4xl font-bold text-accent-primary mb-6">Partida en Curso</h2>
+            <h2 class="text-4xl font-bold accent-primary mb-6">Partida en Curso</h2>
             <div class="bg-secondary p-4 sm:p-8 rounded-2xl shadow-lg">
-                <p id="starting-player-text" class="text-xl text-secondary mb-6"></p>
-                <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
-                <button id="new-game-btn-ingame" class="w-full bg-tertiary hover:opacity-90 text-primary font-bold py-3 px-4 rounded-lg transition-colors">Nuevo Juego</button>
+                 <p id="starting-player-text" class="text-xl text-secondary mb-6"></p>
+                 <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
+                 <button id="new-game-btn-ingame" class="w-full bg-tertiary hover:opacity-90 text-primary font-bold py-3 px-4 rounded-lg transition-colors">Nuevo Juego</button>
             </div>
         </div>
     </div>
@@ -175,14 +164,14 @@
     <!-- Modals -->
     <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-secondary rounded-2xl p-6 max-w-sm text-center shadow-lg">
-            <h3 class="text-2xl font-bold text-accent-danger mb-4">Error</h3>
+            <h3 class="text-2xl font-bold accent-danger mb-4">Error</h3>
             <p id="error-message" class="text-secondary mb-6"></p>
             <button id="close-error-modal-btn" class="bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
         </div>
     </div>
     <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-secondary rounded-2xl p-6 max-w-lg w-full text-center shadow-lg">
-            <h3 class="text-3xl font-bold text-accent-primary mb-6">Estadísticas de Jugadores</h3>
+            <h3 class="text-3xl font-bold accent-primary mb-6">Estadísticas de Jugadores</h3>
             <div id="stats-container" class="max-h-80 overflow-y-auto text-left"></div>
             <button id="close-stats-modal-btn" class="mt-6 bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
         </div>
@@ -194,623 +183,605 @@
         </div>
     </div>
 
-    <!-- Carga el diccionario de palabras ANTES que el script principal del juego -->
-    <script src="words.js"></script>
     <script>
-        // --- CONSTANTES Y ESTADO DEL JUEGO ---
-        const PLAYER_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899'];
-        const TROLL_MODE_PROBABILITY = 0.15;
-        
-        let playerStats = {};
-        let players = [];
-        let gameRoles = { impostors: [], detective: null, civilians: [] };
-        let secretWord = '', selectedCategoryText = '';
-        let isTrollModeActive = false;
-        let selectedColor = PLAYER_COLORS[0];
-        let currentPlayerIndex = 0;
-        let currentTheme = 'default';
-        let isMuted = true;
-        let usedWords = {};
-        let lastRoundImpostors = [];
-
-        // --- ELEMENTOS DEL DOM ---
-        const screens = { setup: document.getElementById('setup-screen'), roleAssignment: document.getElementById('role-assignment-screen'), inGame: document.getElementById('in-game-screen'), reveal: document.getElementById('reveal-screen') };
-        const playerNameInput = document.getElementById('player-name-input');
-        const addPlayerBtn = document.getElementById('add-player-btn');
-        const playersList = document.getElementById('players-list');
-        const impostorCountSelect = document.getElementById('impostor-count');
-        const difficultySelect = document.getElementById('difficulty-select');
-        const categoryCheckboxes = document.getElementById('category-checkboxes');
-        const selectAllCategoriesBtn = document.getElementById('select-all-categories-btn');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const surpriseCategoryBtn = document.getElementById('surprise-category-btn');
-        const impostorHintCheckbox = document.getElementById('impostor-hint-checkbox');
-        const trollModeCheckbox = document.getElementById('troll-mode-checkbox');
-        const detectiveModeCheckbox = document.getElementById('detective-mode-checkbox');
-        const colorPicker = document.getElementById('color-picker');
-        const statsBtn = document.getElementById('stats-btn');
-        const themeSelect = document.getElementById('theme-select');
-        const muteBtn = document.getElementById('mute-btn');
-        const musicOnIcon = document.getElementById('music-on-icon');
-        const musicOffIcon = document.getElementById('music-off-icon');
-        const errorModal = document.getElementById('error-modal');
-        const errorMessage = document.getElementById('error-message');
-        const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
-        const statsModal = document.getElementById('stats-modal');
-        const statsContainer = document.getElementById('stats-container');
-        const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
-        const loadingModal = document.getElementById('loading-modal');
-        const loadingMessage = document.getElementById('loading-message');
-        const currentPlayerNameAssignment = document.getElementById('current-player-name-assignment');
-        const roleCard = document.getElementById('role-card');
-        const roleTitle = document.getElementById('role-title');
-        const roleWord = document.getElementById('role-word');
-        const nextPlayerBtn = document.getElementById('next-player-btn');
-        const startingPlayerText = document.getElementById('starting-player-text');
-        const revealImpostorBtn = document.getElementById('reveal-impostor-btn');
-        const newGameBtnIngame = document.getElementById('new-game-btn-ingame');
-        const revealInfo = document.getElementById('reveal-info');
-        const newGameBtnReveal = document.getElementById('new-game-btn-reveal');
-        const confettiCanvas = document.getElementById('confetti-canvas');
-
-        // --- AUDIO & MUSIC ---
-        let sounds = {};
-        let music = {};
-        let currentLoop;
-
-        function setupAudio() {
-            if (Tone.context.state !== 'running') { Tone.start(); }
-            if (Object.keys(sounds).length > 0) return;
-
-            sounds.default = {
-                flip: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 } }).toDestination(),
-                reveal: new Tone.MembraneSynth().toDestination()
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONSTANTES Y ESTADO DEL JUEGO ---
+            const LOCAL_WORD_CATEGORIES = {
+                "Animales": ["Perro", "Gato", "Elefante", "León", "Jirafa", "Tiburón", "Águila", "Serpiente", "Oso", "Lobo"],
+                "Comida": ["Pizza", "Hamburguesa", "Sushi", "Paella", "Taco", "Ensalada", "Pasta", "Helado", "Sopa", "Chocolate"],
+                "Profesiones": ["Médico", "Profesor", "Bombero", "Policía", "Cocinero", "Ingeniero", "Artista", "Astronauta", "Abogado", "Periodista"],
+                "Deportes": ["Fútbol", "Baloncesto", "Tenis", "Natación", "Béisbol", "Golf", "Boxeo", "Ciclismo", "Atletismo", "Rugby"],
+                "Películas Famosas": ["Titanic", "Star Wars", "El Padrino", "Jurassic Park", "Avatar", "Matrix", "El Señor de los Anillos", "Harry Potter", "Frozen", "Joker"],
+                "Países": ["España", "México", "Japón", "Egipto", "Brasil", "Canadá", "Australia", "Italia", "China", "Rusia"],
+                "Objetos de Casa": ["Silla", "Mesa", "Lámpara", "Sofá", "Cama", "Televisión", "Espejo", "Reloj", "Tenedor", "Ventana"],
+                "Instrumentos Musicales": ["Guitarra", "Piano", "Violín", "Batería", "Trompeta", "Flauta", "Saxofón", "Arpa", "Bajo", "Acordeón"],
+                "Superhéroes": ["Superman", "Batman", "Spiderman", "Iron Man", "Capitán América", "Thor", "Hulk", "Wonder Woman", "Aquaman", "Flash"],
+                "Videojuegos": ["Mario Bros", "Zelda", "Minecraft", "Fortnite", "Among Us", "Pac-Man", "Tetris", "Pokémon", "Sonic", "Grand Theft Auto"]
             };
-            sounds.space = {
-                flip: new Tone.Synth({ oscillator: { type: 'sawtooth' }, filter: { type: 'lowpass', frequency: 4000 }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.1 } }).toDestination(),
-                reveal: new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0 } }).toDestination()
-            };
-            sounds.fantasy = {
-                flip: new Tone.PluckSynth().toDestination(),
-                reveal: new Tone.MetalSynth({ frequency: 150, envelope: { attack: 0.001, decay: 0.4, release: 0.2 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).toDestination()
-            };
-            sounds.noir = {
-                flip: new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination(),
-                reveal: new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.2 } }).toDestination()
-            };
+            const PLAYER_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899'];
+            const TROLL_MODE_PROBABILITY = 0.15;
             
-            const createMusic = (synth, notes) => new Tone.Loop(time => { synth.triggerAttackRelease(notes[Math.floor(Math.random() * notes.length)], "2n", time); }, "1m");
-            music.default = createMusic(new Tone.Synth({ oscillator: { type: 'fmsine' }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.1, release: 1 } }).toDestination(), ['C3', 'E3', 'G3']);
-            music.space = createMusic(new Tone.AMSynth({ harmonicity: 1.5, envelope: { attack: 0.1, decay: 1, sustain: 0.1, release: 1 } }).toDestination(), ['A2', 'C3', 'E3']);
-            music.fantasy = createMusic(new Tone.PluckSynth({ resonance: 0.9 }).toDestination(), ['G4', 'A4', 'C5', 'D5']);
-            music.noir = createMusic(new Tone.Synth({ oscillator: { type: 'triangle8' }, envelope: { attack: 0.5, decay: 0.5, sustain: 0.2, release: 1 } }).toDestination(), ['A#2', 'D3', 'F3']);
-            
-            Tone.Transport.start();
-        }
-        function playFlipSound() {
-            if (isMuted) return;
-            if (!sounds.default) setupAudio();
-            const sound = sounds[currentTheme] || sounds.default;
-            if (currentTheme === 'space') sound.flip.triggerAttackRelease('C4', '8n');
-            else if (currentTheme === 'fantasy') sound.flip.triggerAttackRelease('G5', '8n', Tone.now());
-            else sound.flip.triggerAttackRelease('C5', '8n', Tone.now());
-        }
-        function playRevealSound() {
-            if (isMuted) return;
-            if (!sounds.default) setupAudio();
-            const sound = sounds[currentTheme] || sounds.default;
-            if (currentTheme === 'noir') sound.reveal.triggerAttackRelease('A#2', '2n');
-            else if (currentTheme === 'fantasy') sound.reveal.triggerAttackRelease('C3', '2n');
-            else if (currentTheme === 'space') sound.reveal.triggerAttackRelease('2n');
-            else {
-                sound.reveal.triggerAttackRelease('C2', '8n', Tone.now());
-                sound.reveal.triggerAttackRelease('G2', '8n', Tone.now() + 0.1);
+            let playerStats = {};
+            let players = [];
+            let gameRoles = { impostors: [], detective: null, civilians: [] };
+            let secretWord = '', selectedCategoryText = '';
+            let isTrollModeActive = false;
+            let selectedColor = PLAYER_COLORS[0];
+            let currentPlayerIndex = 0;
+            let currentTheme = 'default';
+            let isMuted = true;
+            let usedWords = {}; // Objeto para rastrear palabras usadas por categoría
+
+            // --- ELEMENTOS DEL DOM ---
+            const screens = { setup: document.getElementById('setup-screen'), roleAssignment: document.getElementById('role-assignment-screen'), inGame: document.getElementById('in-game-screen'), reveal: document.getElementById('reveal-screen') };
+            const playerNameInput = document.getElementById('player-name-input');
+            const addPlayerBtn = document.getElementById('add-player-btn');
+            const playersList = document.getElementById('players-list');
+            const impostorCountSelect = document.getElementById('impostor-count');
+            const categoryCheckboxes = document.getElementById('category-checkboxes');
+            const selectAllCategoriesBtn = document.getElementById('select-all-categories-btn');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const surpriseCategoryBtn = document.getElementById('surprise-category-btn');
+            const trollModeCheckbox = document.getElementById('troll-mode-checkbox');
+            const detectiveModeCheckbox = document.getElementById('detective-mode-checkbox');
+            const colorPicker = document.getElementById('color-picker');
+            const statsBtn = document.getElementById('stats-btn');
+            const themeSelect = document.getElementById('theme-select');
+            const muteBtn = document.getElementById('mute-btn');
+            const musicOnIcon = document.getElementById('music-on-icon');
+            const musicOffIcon = document.getElementById('music-off-icon');
+            const errorModal = document.getElementById('error-modal');
+            const errorMessage = document.getElementById('error-message');
+            const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
+            const statsModal = document.getElementById('stats-modal');
+            const statsContainer = document.getElementById('stats-container');
+            const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
+            const loadingModal = document.getElementById('loading-modal');
+            const loadingMessage = document.getElementById('loading-message');
+            const currentPlayerNameAssignment = document.getElementById('current-player-name-assignment');
+            const roleCard = document.getElementById('role-card');
+            const roleCategory = document.getElementById('role-category');
+            const roleTitle = document.getElementById('role-title');
+            const roleWord = document.getElementById('role-word');
+            const nextPlayerBtn = document.getElementById('next-player-btn');
+            const startingPlayerText = document.getElementById('starting-player-text');
+            const revealImpostorBtn = document.getElementById('reveal-impostor-btn');
+            const newGameBtnIngame = document.getElementById('new-game-btn-ingame');
+            const revealInfo = document.getElementById('reveal-info');
+            const newGameBtnReveal = document.getElementById('new-game-btn-reveal');
+            const confettiCanvas = document.getElementById('confetti-canvas');
+
+            // --- AUDIO & MUSIC ---
+            let sounds = {};
+            let music = {};
+            let currentLoop;
+
+            function setupAudio() {
+                if (Tone.context.state !== 'running') { Tone.start(); }
+                if (Object.keys(sounds).length > 0) return;
+
+                sounds.default = {
+                    flip: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 } }).toDestination(),
+                    reveal: new Tone.MembraneSynth().toDestination()
+                };
+                sounds.space = {
+                    flip: new Tone.Synth({ oscillator: { type: 'sawtooth' }, filter: { type: 'lowpass', frequency: 4000 }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.1 } }).toDestination(),
+                    reveal: new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0 } }).toDestination()
+                };
+                sounds.fantasy = {
+                    flip: new Tone.PluckSynth().toDestination(),
+                    reveal: new Tone.MetalSynth({ frequency: 150, envelope: { attack: 0.001, decay: 0.4, release: 0.2 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).toDestination()
+                };
+                sounds.noir = {
+                    flip: new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination(),
+                    reveal: new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.2 } }).toDestination()
+                };
+                
+                const createMusic = (synth, notes) => new Tone.Loop(time => { synth.triggerAttackRelease(notes[Math.floor(Math.random() * notes.length)], "2n", time); }, "1m");
+                music.default = createMusic(new Tone.Synth({ oscillator: { type: 'fmsine' }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.1, release: 1 } }).toDestination(), ['C3', 'E3', 'G3']);
+                music.space = createMusic(new Tone.AMSynth({ harmonicity: 1.5, envelope: { attack: 0.1, decay: 1, sustain: 0.1, release: 1 } }).toDestination(), ['A2', 'C3', 'E3']);
+                music.fantasy = createMusic(new Tone.PluckSynth({ resonance: 0.9 }).toDestination(), ['G4', 'A4', 'C5', 'D5']);
+                music.noir = createMusic(new Tone.Synth({ oscillator: { type: 'triangle8' }, envelope: { attack: 0.5, decay: 0.5, sustain: 0.2, release: 1 } }).toDestination(), ['A#2', 'D3', 'F3']);
+                
+                Tone.Transport.start();
             }
-        }
-        function playMusic(theme) {
-            setupAudio();
-            if (currentLoop) currentLoop.stop();
-            if (!isMuted) {
-                currentLoop = music[theme] || music.default;
-                if (currentLoop) {
-                    currentLoop.start(0);
+            function playFlipSound() {
+                if (isMuted) return;
+                if (!sounds.default) setupAudio();
+                const sound = sounds[currentTheme] || sounds.default;
+                if (currentTheme === 'space') sound.flip.triggerAttackRelease('C4', '8n');
+                else if (currentTheme === 'fantasy') sound.flip.triggerAttackRelease('G5', '8n', Tone.now());
+                else sound.flip.triggerAttackRelease('C5', '8n', Tone.now());
+            }
+            function playRevealSound() {
+                if (isMuted) return;
+                if (!sounds.default) setupAudio();
+                const sound = sounds[currentTheme] || sounds.default;
+                if (currentTheme === 'noir') sound.reveal.triggerAttackRelease('A#2', '2n');
+                else if (currentTheme === 'fantasy') sound.reveal.triggerAttackRelease('C3', '2n');
+                else if (currentTheme === 'space') sound.reveal.triggerAttackRelease('2n');
+                else {
+                    sound.reveal.triggerAttackRelease('C2', '8n', Tone.now());
+                    sound.reveal.triggerAttackRelease('G2', '8n', Tone.now() + 0.1);
                 }
             }
-        }
-        function toggleMute() {
-            setupAudio();
-            isMuted = !isMuted;
-            if (isMuted) {
+            function playMusic(theme) {
+                setupAudio();
                 if (currentLoop) currentLoop.stop();
-            } else {
-                playMusic(currentTheme);
-            }
-            musicOnIcon.classList.toggle('hidden', isMuted);
-            musicOffIcon.classList.toggle('hidden', !isMuted);
-        }
-
-        // --- THEME MANAGEMENT ---
-        function applyTheme(theme) {
-            document.body.className = `theme-${theme}`;
-            currentTheme = theme;
-            localStorage.setItem('imposterTheme', theme);
-            playMusic(theme);
-        }
-
-        // --- LÓGICA DE LA APLICACIÓN ---
-        function showScreen(screenName) {
-            Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-            screens[screenName].classList.remove('hidden');
-            if (screenName === 'setup' || screenName === 'roleAssignment') {
-                playMusic(currentTheme);
-            } else {
-                if (currentLoop) currentLoop.stop();
-            }
-        }
-
-        function showModal(modal, message = '') {
-            if (message) {
-                if(modal === errorModal) errorMessage.textContent = message;
-                if(modal === loadingModal) loadingMessage.textContent = message;
-            }
-            modal.classList.remove('hidden');
-        }
-
-        function hideModal(modal) {
-            modal.classList.add('hidden');
-        }
-
-        function showError(message) {
-            showModal(errorModal, message);
-        }
-
-        // Player Management
-        function loadPlayers() {
-            const savedPlayers = localStorage.getItem('imposterPlayers');
-            if (savedPlayers) {
-                players = JSON.parse(savedPlayers);
-            }
-        }
-
-        function savePlayers() {
-            localStorage.setItem('imposterPlayers', JSON.stringify(players));
-        }
-
-        function populateColorPicker() {
-            colorPicker.innerHTML = '';
-            PLAYER_COLORS.forEach(color => {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.style.backgroundColor = color;
-                if (color === selectedColor) swatch.classList.add('selected');
-                swatch.addEventListener('click', () => {
-                    selectedColor = color;
-                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-                    swatch.classList.add('selected');
-                });
-                colorPicker.appendChild(swatch);
-            });
-        }
-
-        function addPlayer() {
-            const name = playerNameInput.value.trim();
-            if (name && players.length < 12) {
-                if(players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-                    showError("Ese nombre ya está en la lista.");
-                    return;
-                }
-                players.push({ name, color: selectedColor });
-                savePlayers();
-                playerNameInput.value = '';
-                updatePlayersList(true);
-                const usedColors = players.map(p => p.color);
-                const nextColor = PLAYER_COLORS.find(c => !usedColors.includes(c)) || PLAYER_COLORS[0];
-                selectedColor = nextColor;
-                document.querySelectorAll('.color-swatch').forEach(s => {
-                    s.classList.toggle('selected', s.style.backgroundColor === selectedColor);
-                });
-                lastRoundImpostors = [];
-            }
-            playerNameInput.focus();
-        }
-
-        function updateImpostorCountOptions() {
-            const previousValue = impostorCountSelect.value;
-            impostorCountSelect.innerHTML = '';
-
-            if (players.length >= 3) {
-                const option1 = document.createElement('option');
-                option1.value = '1';
-                option1.textContent = '1';
-                impostorCountSelect.appendChild(option1);
-            }
-            if (players.length >= 5) {
-                const option2 = document.createElement('option');
-                option2.value = '2';
-                option2.textContent = '2';
-                impostorCountSelect.appendChild(option2);
-            }
-            
-            if (previousValue && impostorCountSelect.querySelector(`option[value="${previousValue}"]`)) {
-                impostorCountSelect.value = previousValue;
-            }
-        }
-
-        function updatePlayersList(animateLast = false) {
-            playersList.innerHTML = '';
-            if (players.length === 0) {
-                playersList.innerHTML = '<p class="text-secondary">Añade de 3 a 12 jugadores.</p>';
-            } else {
-                players.forEach((player, index) => {
-                    const playerElement = document.createElement('div');
-                    playerElement.className = 'flex justify-between items-center bg-tertiary p-2 rounded-md mb-1';
-                    if (animateLast && index === players.length - 1) {
-                        playerElement.classList.add('player-added-animation');
-                    }
-                    playerElement.innerHTML = `
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded-full mr-3" style="background-color: ${player.color};"></div>
-                            <span>${player.name}</span>
-                        </div>
-                        <button class="text-red-500 hover:text-red-400 font-bold" data-index="${index}">X</button>
-                    `;
-                    playersList.appendChild(playerElement);
-                });
-            }
-            updateImpostorCountOptions();
-            validateGameStart();
-        }
-
-        // Category Management
-        function populateCategories() {
-            categoryCheckboxes.innerHTML = '';
-            Object.keys(WORD_CATEGORIES).forEach(categoryName => {
-                const categoryId = `category-${categoryName.replace(/\s+/g, '-')}`;
-                const label = document.createElement('label');
-                label.className = 'flex items-center space-x-2 text-primary p-2 bg-tertiary rounded-md cursor-pointer hover:opacity-80';
-                label.innerHTML = `
-                    <input type="checkbox" id="${categoryId}" class="form-checkbox bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary" name="category" value="${categoryName}">
-                    <span>${categoryName}</span>
-                `;
-                categoryCheckboxes.appendChild(label);
-                label.querySelector('input').addEventListener('change', validateGameStart);
-            });
-        }
-
-        // Stats Management
-        function loadStats() {
-            const saved = localStorage.getItem('imposterPlayerStats');
-            playerStats = saved ? JSON.parse(saved) : {};
-        }
-
-        function saveStats() {
-            localStorage.setItem('imposterPlayerStats', JSON.stringify(playerStats));
-        }
-
-        function updateStats(winners, losers) {
-            winners.forEach(p => {
-                if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
-                playerStats[p.name].wins++;
-            });
-            losers.forEach(p => {
-                if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
-                playerStats[p.name].losses++;
-            });
-            saveStats();
-        }
-        
-        function showStats() {
-            statsContainer.innerHTML = '';
-            const sortedPlayers = Object.keys(playerStats).sort((a, b) => (playerStats[b].wins - playerStats[b].losses) - (playerStats[a].wins - playerStats[a].losses));
-
-            if (sortedPlayers.length === 0) {
-                statsContainer.innerHTML = '<p class="text-secondary text-center">No hay estadísticas guardadas. ¡Juega una partida!</p>';
-            } else {
-                 sortedPlayers.forEach(name => {
-                    const stats = playerStats[name];
-                    const winRate = stats.wins + stats.losses > 0 ? Math.round((stats.wins / (stats.wins + stats.losses)) * 100) : 0;
-                    const playerElement = document.createElement('div');
-                    playerElement.className = 'bg-tertiary p-3 rounded-lg mb-2 flex justify-between items-center';
-                    playerElement.innerHTML = `
-                        <div>
-                            <p class="font-bold text-lg">${name}</p>
-                            <p class="text-sm text-secondary">Victorias: ${stats.wins} / Derrotas: ${stats.losses}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="font-bold text-xl text-accent-primary">${winRate}%</p>
-                            <p class="text-xs text-gray-500">Win Rate</p>
-                        </div>
-                    `;
-                    statsContainer.appendChild(playerElement);
-                });
-            }
-            showModal(statsModal);
-        }
-
-        // Game Logic
-        function validateGameStart() {
-            let minPlayers = 3;
-            if (detectiveModeCheckbox.checked) minPlayers = 4;
-            
-            const selectedCategories = document.querySelectorAll('#category-checkboxes input:checked').length;
-            const canStart = players.length >= minPlayers && selectedCategories > 0;
-            startGameBtn.disabled = !canStart;
-            startGameBtn.title = canStart ? '' : `Se necesitan al menos ${minPlayers} jugadores para este modo.`;
-        }
-        
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function startGame() {
-            showModal(loadingModal, 'Preparando la partida...');
-            
-            const selectedCheckboxes = Array.from(document.querySelectorAll('#category-checkboxes input:checked'));
-            const selectedCategories = selectedCheckboxes.map(cb => cb.value);
-            
-            selectedCategoryText = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
-            
-            let difficulty = difficultySelect.value;
-            if (difficulty === 'random') {
-                const difficulties = ['easy', 'medium', 'hard'];
-                difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
-            }
-
-            let wordPool = WORD_CATEGORIES[selectedCategoryText][difficulty];
-            
-            if (!usedWords[selectedCategoryText]) {
-                usedWords[selectedCategoryText] = { easy: [], medium: [], hard: [] };
-            }
-            let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText][difficulty].includes(w));
-
-            if (availableWords.length === 0) {
-                usedWords[selectedCategoryText][difficulty] = [];
-                availableWords = wordPool;
-            }
-            
-            secretWord = availableWords[Math.floor(Math.random() * availableWords.length)];
-            usedWords[selectedCategoryText][difficulty].push(secretWord);
-
-            isTrollModeActive = trollModeCheckbox.checked && Math.random() < TROLL_MODE_PROBABILITY;
-            
-            const impostorCount = parseInt(impostorCountSelect.value);
-            const useDetective = detectiveModeCheckbox.checked;
-
-            if (impostorCount + (useDetective ? 1 : 0) >= players.length) {
-                hideModal(loadingModal);
-                showError("Debe haber al menos un civil que no sea el detective.");
-                return;
-            }
-
-            gameRoles = { impostors: [], detective: null, civilians: [] };
-
-            if (isTrollModeActive) {
-                gameRoles.impostors = players.map(p => p.name);
-            } else {
-                const priorityCandidates = players.filter(p => !lastRoundImpostors.includes(p.name));
-                const secondaryCandidates = players.filter(p => lastRoundImpostors.includes(p.name));
-
-                shuffleArray(priorityCandidates);
-                shuffleArray(secondaryCandidates);
-
-                for (let i = 0; i < impostorCount; i++) {
-                    if (priorityCandidates.length > 0) {
-                        const newImpostor = priorityCandidates.pop();
-                        gameRoles.impostors.push(newImpostor.name);
-                    } else if (secondaryCandidates.length > 0) {
-                        const newImpostor = secondaryCandidates.pop();
-                        gameRoles.impostors.push(newImpostor.name);
+                if (!isMuted) {
+                    currentLoop = music[theme] || music.default;
+                    if (currentLoop) {
+                        currentLoop.start(0);
                     }
                 }
-
-                let remainingPlayers = players.filter(p => !gameRoles.impostors.includes(p.name));
-                shuffleArray(remainingPlayers);
-
-                if (useDetective) {
-                    gameRoles.detective = remainingPlayers.pop().name;
-                }
-                gameRoles.civilians = remainingPlayers.map(p => p.name);
             }
-            
-            lastRoundImpostors = [...gameRoles.impostors];
-
-            setTimeout(() => {
-                hideModal(loadingModal);
-                currentPlayerIndex = 0;
-                showScreen('roleAssignment');
-                displayRoleForCurrentPlayer();
-            }, 500);
-        }
-        
-        function updateRoleCardContent() {
-            const player = players[currentPlayerIndex];
-            currentPlayerNameAssignment.textContent = player.name;
-
-            let title = '', text = '';
-            if (gameRoles.impostors.includes(player.name)) {
-                title = '🤫 ¡Eres IMPOSTOR!';
-                if (impostorHintCheckbox.checked && !isTrollModeActive) {
-                    text = `Pista: La categoría es <strong>${selectedCategoryText}</strong>.`;
+            function toggleMute() {
+                setupAudio();
+                isMuted = !isMuted;
+                if (isMuted) {
+                    if (currentLoop) currentLoop.stop();
                 } else {
-                    text = 'Descubre la palabra secreta.';
+                    playMusic(currentTheme);
                 }
-            } else if (gameRoles.detective === player.name) {
-                title = '🕵️ ¡Eres DETECTIVE!';
-                text = `La palabra es: "${secretWord}"`;
-            } else {
-                title = '👤 Eres un CIVIL';
-                text = `La palabra es: "${secretWord}"`;
+                musicOnIcon.classList.toggle('hidden', isMuted);
+                musicOffIcon.classList.toggle('hidden', !isMuted);
             }
-            roleTitle.textContent = title;
-            roleWord.innerHTML = text;
-        }
 
-        function displayRoleForCurrentPlayer() {
-            roleCard.classList.remove('is-flipped');
-            nextPlayerBtn.classList.add('hidden');
-            updateRoleCardContent();
-        }
-        
-        function nextPlayer() {
-            currentPlayerIndex++;
-            if (currentPlayerIndex < players.length) {
-                roleCard.classList.remove('is-flipped');
-                nextPlayerBtn.classList.add('hidden');
-                setTimeout(() => {
-                    updateRoleCardContent();
-                }, 600);
-            } else {
-                const potentialStarters = players.filter(p => !gameRoles.impostors.includes(p.name));
-                
-                if (isTrollModeActive || potentialStarters.length === 0) {
-                    const randomPlayer = players[Math.floor(Math.random() * players.length)];
-                    startingPlayerText.innerHTML = `¡Ronda de locos! Empieza <span class="font-bold text-accent-primary">${randomPlayer.name}</span>.`;
+            // --- THEME MANAGEMENT ---
+            function applyTheme(theme) {
+                document.body.className = `bg-primary text-primary theme-${theme}`;
+                currentTheme = theme;
+                localStorage.setItem('imposterTheme', theme);
+                playMusic(theme);
+            }
+
+            // --- LÓGICA DE LA APLICACIÓN ---
+            function showScreen(screenName) {
+                Object.values(screens).forEach(screen => screen.classList.add('hidden'));
+                screens[screenName].classList.remove('hidden');
+                if (screenName === 'setup' || screenName === 'roleAssignment') {
+                    playMusic(currentTheme);
                 } else {
-                    const startingPlayer = potentialStarters[Math.floor(Math.random() * potentialStarters.length)];
-                    startingPlayerText.innerHTML = `Empieza <span class="font-bold text-accent-primary">${startingPlayer.name}</span>.`;
+                    if (currentLoop) currentLoop.stop();
                 }
-                
-                showScreen('inGame');
-            }
-        }
-
-        function revealRoles() {
-            playRevealSound();
-            let winners, losers;
-            if (!isTrollModeActive) {
-                losers = players.filter(p => gameRoles.impostors.includes(p.name));
-                winners = players.filter(p => !gameRoles.impostors.includes(p.name));
-                updateStats(winners, losers);
-                triggerConfetti(winners.map(p => p.color));
             }
 
-            let html = '';
-            if (isTrollModeActive) {
-                html += `<h3 class="text-4xl font-bold text-accent-danger mb-4">¡RONDA TROLL!</h3><p class="text-lg text-secondary">¡Todos erais impostores! La palabra "secreta" era <span class="font-bold text-accent-primary">${secretWord}</span>.</p>`;
-            } else {
-                const impostorText = gameRoles.impostors.length > 1 ? 'Los impostores eran' : 'El impostor era';
-                html += `<p class="text-lg text-secondary">${impostorText}: <span class="font-bold text-accent-danger">${gameRoles.impostors.join(', ')}</span></p>`;
-                if(gameRoles.detective) {
-                    html += `<p class="text-lg text-secondary">El detective era: <span class="font-bold text-accent-secondary">${gameRoles.detective}</span></p>`;
+            function showModal(modal, message = '') {
+                if (message) {
+                    if(modal === errorModal) errorMessage.textContent = message;
+                    if(modal === loadingModal) loadingMessage.textContent = message;
                 }
-                html += `<p class="text-lg text-secondary">La palabra secreta era: <span class="font-bold text-accent-primary">${secretWord}</span></p>`;
+                modal.classList.remove('hidden');
             }
-            revealInfo.innerHTML = html;
-            showScreen('reveal');
-        }
 
-        function resetGame() {
-            gameRoles = { impostors: [], detective: null, civilians: [] };
-            secretWord = '', selectedCategoryText = '';
-            isTrollModeActive = false;
-            currentPlayerIndex = 0;
-            
-            playerNameInput.value = '';
-            
-            trollModeCheckbox.checked = false;
-            detectiveModeCheckbox.checked = false;
-            impostorHintCheckbox.checked = false;
-            validateGameStart();
-            showScreen('setup');
-        }
-        
-        // --- Confetti ---
-        function triggerConfetti(colors) {
-            const canvas = confettiCanvas;
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            let particles = [];
-            const particleCount = 150;
-            const confettiColors = colors.length > 0 ? colors : PLAYER_COLORS;
+            function hideModal(modal) {
+                modal.classList.add('hidden');
+            }
 
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height - canvas.height,
-                    size: Math.random() * 5 + 2,
-                    speed: Math.random() * 5 + 2,
-                    angle: Math.random() * 360,
-                    color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-                    spin: Math.random() < 0.5 ? -1 : 1
+            function showError(message) {
+                showModal(errorModal, message);
+            }
+
+            // Player Management
+            function loadPlayers() {
+                const savedPlayers = localStorage.getItem('imposterPlayers');
+                if (savedPlayers) {
+                    players = JSON.parse(savedPlayers);
+                }
+            }
+
+            function savePlayers() {
+                localStorage.setItem('imposterPlayers', JSON.stringify(players));
+            }
+
+            function populateColorPicker() {
+                colorPicker.innerHTML = '';
+                PLAYER_COLORS.forEach(color => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    if (color === selectedColor) swatch.classList.add('selected');
+                    swatch.addEventListener('click', () => {
+                        selectedColor = color;
+                        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                        swatch.classList.add('selected');
+                    });
+                    colorPicker.appendChild(swatch);
                 });
             }
 
-            let animationFrame;
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach((p, i) => {
-                    p.y += p.speed;
-                    p.angle += p.spin * 5;
-                    if (p.y > canvas.height) particles.splice(i, 1);
-                    
-                    ctx.save();
-                    ctx.translate(p.x, p.y);
-                    ctx.rotate(p.angle * Math.PI / 180);
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 2);
-                    ctx.restore();
-                });
+            function addPlayer() {
+                const name = playerNameInput.value.trim();
+                if (name && players.length < 12) {
+                    if(players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+                        showError("Ese nombre ya está en la lista.");
+                        return;
+                    }
+                    players.push({ name, color: selectedColor });
+                    savePlayers();
+                    playerNameInput.value = '';
+                    updatePlayersList(true);
+                    const usedColors = players.map(p => p.color);
+                    const nextColor = PLAYER_COLORS.find(c => !usedColors.includes(c)) || PLAYER_COLORS[0];
+                    selectedColor = nextColor;
+                    document.querySelectorAll('.color-swatch').forEach(s => {
+                        s.classList.toggle('selected', s.style.backgroundColor === selectedColor);
+                    });
+                }
+                playerNameInput.focus();
+            }
 
-                if (particles.length > 0) {
-                    animationFrame = requestAnimationFrame(animate);
-                } else {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+            function updateImpostorCountOptions() {
+                const previousValue = impostorCountSelect.value;
+                impostorCountSelect.innerHTML = '';
+
+                if (players.length >= 3) {
+                    const option1 = document.createElement('option');
+                    option1.value = '1';
+                    option1.textContent = '1';
+                    impostorCountSelect.appendChild(option1);
+                }
+                if (players.length >= 5) {
+                    const option2 = document.createElement('option');
+                    option2.value = '2';
+                    option2.textContent = '2';
+                    impostorCountSelect.appendChild(option2);
+                }
+                
+                if (previousValue && impostorCountSelect.querySelector(`option[value="${previousValue}"]`)) {
+                    impostorCountSelect.value = previousValue;
                 }
             }
-            animate();
-            setTimeout(() => cancelAnimationFrame(animationFrame), 4000);
-        }
 
-        // --- EVENT LISTENERS ---
-        addPlayerBtn.addEventListener('click', addPlayer);
-        playerNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') addPlayerBtn.click(); });
-        playersList.addEventListener('click', (e) => { 
-            if (e.target.tagName === 'BUTTON') { 
-                players.splice(e.target.dataset.index, 1); 
-                savePlayers();
-                updatePlayersList();
-                lastRoundImpostors = [];
-            } 
-        });
-        selectAllCategoriesBtn.addEventListener('click', () => {
-            const checkboxes = document.querySelectorAll('#category-checkboxes input');
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            checkboxes.forEach(cb => cb.checked = !allChecked);
-            validateGameStart();
-        });
-        detectiveModeCheckbox.addEventListener('change', validateGameStart);
-        startGameBtn.addEventListener('click', startGame);
-        roleCard.addEventListener('click', () => { 
-            if (roleCard.classList.contains('is-flipped')) return;
-            roleCard.classList.add('is-flipped'); 
-            nextPlayerBtn.classList.remove('hidden');
-            playFlipSound();
-        });
-        nextPlayerBtn.addEventListener('click', nextPlayer);
-        revealImpostorBtn.addEventListener('click', revealRoles);
-        newGameBtnIngame.addEventListener('click', resetGame);
-        newGameBtnReveal.addEventListener('click', resetGame);
-        closeErrorModalBtn.addEventListener('click', () => hideModal(errorModal));
-        statsBtn.addEventListener('click', showStats);
-        closeStatsModalBtn.addEventListener('click', () => hideModal(statsModal));
-        themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
-        muteBtn.addEventListener('click', toggleMute);
-        surpriseCategoryBtn.addEventListener('click', () => {
-            const checkboxes = Array.from(document.querySelectorAll('#category-checkboxes input'));
-            if (checkboxes.length > 0) {
-                checkboxes.forEach(cb => cb.checked = false);
-                const randomCheckbox = checkboxes[Math.floor(Math.random() * checkboxes.length)];
-                randomCheckbox.checked = true;
+            function updatePlayersList(animateLast = false) {
+                playersList.innerHTML = '';
+                if (players.length === 0) {
+                    playersList.innerHTML = '<p class="text-secondary">Añade de 3 a 12 jugadores.</p>';
+                } else {
+                    players.forEach((player, index) => {
+                        const playerElement = document.createElement('div');
+                        playerElement.className = 'flex justify-between items-center bg-tertiary p-2 rounded-md mb-1';
+                        if (animateLast && index === players.length - 1) {
+                            playerElement.classList.add('player-added-animation');
+                        }
+                        playerElement.innerHTML = `
+                            <div class="flex items-center">
+                                <div class="w-5 h-5 rounded-full mr-3" style="background-color: ${player.color};"></div>
+                                <span>${player.name}</span>
+                            </div>
+                            <button class="text-red-500 hover:text-red-400 font-bold" data-index="${index}">X</button>
+                        `;
+                        playersList.appendChild(playerElement);
+                    });
+                }
+                updateImpostorCountOptions();
                 validateGameStart();
             }
-        });
 
-        // --- INICIALIZACIÓN ---
-        document.addEventListener('DOMContentLoaded', () => {
+            // Category Management
+            function populateCategories() {
+                categoryCheckboxes.innerHTML = '';
+                Object.keys(LOCAL_WORD_CATEGORIES).forEach(categoryName => {
+                    const categoryId = `category-${categoryName.replace(/\s+/g, '-')}`;
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center space-x-2 text-primary p-2 bg-tertiary rounded-md cursor-pointer hover:opacity-80';
+                    label.innerHTML = `
+                        <input type="checkbox" id="${categoryId}" class="form-checkbox bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary" name="category" value="${categoryName}">
+                        <span>${categoryName}</span>
+                    `;
+                    categoryCheckboxes.appendChild(label);
+                    label.querySelector('input').addEventListener('change', validateGameStart);
+                });
+            }
+
+            // Stats Management
+            function loadStats() {
+                const saved = localStorage.getItem('imposterPlayerStats');
+                playerStats = saved ? JSON.parse(saved) : {};
+            }
+
+            function saveStats() {
+                localStorage.setItem('imposterPlayerStats', JSON.stringify(playerStats));
+            }
+
+            function updateStats(winners, losers) {
+                winners.forEach(p => {
+                    if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
+                    playerStats[p.name].wins++;
+                });
+                losers.forEach(p => {
+                    if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
+                    playerStats[p.name].losses++;
+                });
+                saveStats();
+            }
+            
+            function showStats() {
+                statsContainer.innerHTML = '';
+                const sortedPlayers = Object.keys(playerStats).sort((a, b) => (playerStats[b].wins - playerStats[b].losses) - (playerStats[a].wins - playerStats[a].losses));
+
+                if (sortedPlayers.length === 0) {
+                    statsContainer.innerHTML = '<p class="text-secondary text-center">No hay estadísticas guardadas. ¡Juega una partida!</p>';
+                } else {
+                     sortedPlayers.forEach(name => {
+                        const stats = playerStats[name];
+                        const winRate = stats.wins + stats.losses > 0 ? Math.round((stats.wins / (stats.wins + stats.losses)) * 100) : 0;
+                        const playerElement = document.createElement('div');
+                        playerElement.className = 'bg-tertiary p-3 rounded-lg mb-2 flex justify-between items-center';
+                        playerElement.innerHTML = `
+                            <div>
+                                <p class="font-bold text-lg">${name}</p>
+                                <p class="text-sm text-secondary">Victorias: ${stats.wins} / Derrotas: ${stats.losses}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-xl accent-primary">${winRate}%</p>
+                                <p class="text-xs text-gray-500">Win Rate</p>
+                            </div>
+                        `;
+                        statsContainer.appendChild(playerElement);
+                    });
+                }
+                showModal(statsModal);
+            }
+
+            // Game Logic
+            function validateGameStart() {
+                let minPlayers = 3;
+                if (detectiveModeCheckbox.checked) minPlayers = 4;
+                
+                const selectedCategories = document.querySelectorAll('#category-checkboxes input:checked').length;
+                const canStart = players.length >= minPlayers && selectedCategories > 0;
+                startGameBtn.disabled = !canStart;
+                startGameBtn.title = canStart ? '' : `Se necesitan al menos ${minPlayers} jugadores para este modo.`;
+            }
+            
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function startGame() {
+                showModal(loadingModal, 'Preparando la partida...');
+                
+                const selectedCheckboxes = Array.from(document.querySelectorAll('#category-checkboxes input:checked'));
+                const selectedCategories = selectedCheckboxes.map(cb => cb.value);
+                
+                selectedCategoryText = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
+                
+                let wordPool = LOCAL_WORD_CATEGORIES[selectedCategoryText];
+                if (!usedWords[selectedCategoryText]) {
+                    usedWords[selectedCategoryText] = [];
+                }
+                let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText].includes(w));
+
+                if (availableWords.length === 0) {
+                    usedWords[selectedCategoryText] = [];
+                    availableWords = wordPool;
+                }
+                
+                secretWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+                usedWords[selectedCategoryText].push(secretWord);
+
+                isTrollModeActive = trollModeCheckbox.checked && Math.random() < TROLL_MODE_PROBABILITY;
+                
+                const impostorCount = parseInt(impostorCountSelect.value);
+                const useDetective = detectiveModeCheckbox.checked;
+
+                if (impostorCount + (useDetective ? 1 : 0) >= players.length) {
+                    hideModal(loadingModal);
+                    showError("Debe haber al menos un civil que no sea el detective.");
+                    return;
+                }
+
+                let playersToAssign = [...players];
+                shuffleArray(playersToAssign);
+                gameRoles = { impostors: [], detective: null, civilians: [] };
+
+                if (isTrollModeActive) {
+                    gameRoles.impostors = players.map(p => p.name);
+                } else {
+                    for (let i = 0; i < impostorCount; i++) {
+                        gameRoles.impostors.push(playersToAssign.pop().name);
+                    }
+                    if (useDetective) {
+                        gameRoles.detective = playersToAssign.pop().name;
+                    }
+                    gameRoles.civilians = playersToAssign.map(p => p.name);
+                }
+                
+                setTimeout(() => {
+                    hideModal(loadingModal);
+                    currentPlayerIndex = 0;
+                    showScreen('roleAssignment');
+                    displayRoleForCurrentPlayer();
+                }, 500);
+            }
+            
+            function updateRoleCardContent() {
+                const player = players[currentPlayerIndex];
+                currentPlayerNameAssignment.textContent = player.name;
+                roleCategory.textContent = selectedCategoryText;
+
+                let title = '', text = '';
+                if (isTrollModeActive) {
+                    title = '🤫 ¡Eres IMPOSTOR!';
+                    text = 'Descubre la palabra secreta.';
+                } else if (gameRoles.impostors.includes(player.name)) {
+                    title = '🤫 ¡Eres IMPOSTOR!';
+                    text = 'Descubre la palabra secreta.';
+                } else if (gameRoles.detective === player.name) {
+                    title = '🕵️ ¡Eres DETECTIVE!';
+                    text = `La palabra es: "${secretWord}". ¡Acusa sabiamente!`;
+                } else {
+                    title = '👤 Eres un CIVIL';
+                    text = `La palabra es: "${secretWord}"`;
+                }
+                roleTitle.textContent = title;
+                roleWord.innerHTML = text;
+            }
+
+            function displayRoleForCurrentPlayer() {
+                roleCard.classList.remove('is-flipped');
+                nextPlayerBtn.classList.add('hidden');
+                updateRoleCardContent();
+            }
+            
+            function nextPlayer() {
+                currentPlayerIndex++;
+                if (currentPlayerIndex < players.length) {
+                    roleCard.classList.remove('is-flipped');
+                    nextPlayerBtn.classList.add('hidden');
+                    setTimeout(() => {
+                        updateRoleCardContent();
+                    }, 600);
+                } else {
+                    const potentialStarters = players.filter(p => !gameRoles.impostors.includes(p.name));
+                    
+                    if (isTrollModeActive || potentialStarters.length === 0) {
+                        const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                        startingPlayerText.innerHTML = `¡Ronda de locos! Empieza <span class="font-bold accent-primary">${randomPlayer.name}</span>.`;
+                    } else {
+                        const startingPlayer = potentialStarters[Math.floor(Math.random() * potentialStarters.length)];
+                        startingPlayerText.innerHTML = `Empieza <span class="font-bold accent-primary">${startingPlayer.name}</span>.`;
+                    }
+                    
+                    showScreen('inGame');
+                }
+            }
+
+            function revealRoles() {
+                playRevealSound();
+                let winners, losers;
+                if (!isTrollModeActive) {
+                    losers = players.filter(p => gameRoles.impostors.includes(p.name));
+                    winners = players.filter(p => !gameRoles.impostors.includes(p.name));
+                    updateStats(winners, losers);
+                    triggerConfetti(winners.map(p => p.color));
+                }
+
+                let html = '';
+                if (isTrollModeActive) {
+                    html += `<h3 class="text-4xl font-bold accent-danger mb-4">¡RONDA TROLL!</h3><p class="text-lg text-secondary">¡Todos erais impostores! La palabra "secreta" era <span class="font-bold accent-primary">${secretWord}</span>.</p>`;
+                } else {
+                    const impostorText = gameRoles.impostors.length > 1 ? 'Los impostores eran' : 'El impostor era';
+                    html += `<p class="text-lg text-secondary">${impostorText}: <span class="font-bold accent-danger">${gameRoles.impostors.join(', ')}</span></p>`;
+                    if(gameRoles.detective) {
+                        html += `<p class="text-lg text-secondary">El detective era: <span class="font-bold text-blue-400">${gameRoles.detective}</span></p>`;
+                    }
+                    html += `<p class="text-lg text-secondary">La palabra secreta era: <span class="font-bold accent-primary">${secretWord}</span></p>`;
+                }
+                revealInfo.innerHTML = html;
+                showScreen('reveal');
+            }
+
+            function resetGame() {
+                gameRoles = { impostors: [], detective: null, civilians: [] };
+                secretWord = '', selectedCategoryText = '';
+                isTrollModeActive = false;
+                currentPlayerIndex = 0;
+                
+                playerNameInput.value = '';
+                document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false);
+                trollModeCheckbox.checked = false;
+                detectiveModeCheckbox.checked = false;
+                validateGameStart();
+                showScreen('setup');
+            }
+            
+            // --- Confetti ---
+            function triggerConfetti(colors) {
+                const canvas = confettiCanvas;
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                let particles = [];
+                const particleCount = 150;
+                const confettiColors = colors.length > 0 ? colors : PLAYER_COLORS;
+
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height - canvas.height,
+                        size: Math.random() * 5 + 2,
+                        speed: Math.random() * 5 + 2,
+                        angle: Math.random() * 360,
+                        color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                        spin: Math.random() < 0.5 ? -1 : 1
+                    });
+                }
+
+                let animationFrame;
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach((p, i) => {
+                        p.y += p.speed;
+                        p.angle += p.spin * 5;
+                        if (p.y > canvas.height) particles.splice(i, 1);
+                        
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.angle * Math.PI / 180);
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 2);
+                        ctx.restore();
+                    });
+
+                    if (particles.length > 0) {
+                        animationFrame = requestAnimationFrame(animate);
+                    } else {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                }
+                animate();
+                setTimeout(() => cancelAnimationFrame(animationFrame), 4000);
+            }
+
+            // --- EVENT LISTENERS ---
+            addPlayerBtn.addEventListener('click', addPlayer);
+            playerNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') addPlayerBtn.click(); });
+            playersList.addEventListener('click', (e) => { 
+                if (e.target.tagName === 'BUTTON') { 
+                    players.splice(e.target.dataset.index, 1); 
+                    savePlayers();
+                    updatePlayersList(); 
+                } 
+            });
+            selectAllCategoriesBtn.addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('#category-checkboxes input');
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+                validateGameStart();
+            });
+            detectiveModeCheckbox.addEventListener('change', validateGameStart);
+            startGameBtn.addEventListener('click', startGame);
+            roleCard.addEventListener('click', () => { 
+                if (roleCard.classList.contains('is-flipped')) return;
+                roleCard.classList.add('is-flipped'); 
+                nextPlayerBtn.classList.remove('hidden');
+                playFlipSound();
+            });
+            nextPlayerBtn.addEventListener('click', nextPlayer);
+            revealImpostorBtn.addEventListener('click', revealRoles);
+            newGameBtnIngame.addEventListener('click', resetGame);
+            newGameBtnReveal.addEventListener('click', resetGame);
+            closeErrorModalBtn.addEventListener('click', () => hideModal(errorModal));
+            statsBtn.addEventListener('click', showStats);
+            closeStatsModalBtn.addEventListener('click', () => hideModal(statsModal));
+            themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
+            muteBtn.addEventListener('click', toggleMute);
+            surpriseCategoryBtn.addEventListener('click', () => {
+                const checkboxes = Array.from(document.querySelectorAll('#category-checkboxes input'));
+                if (checkboxes.length > 0) {
+                    checkboxes.forEach(cb => cb.checked = false);
+                    const randomCheckbox = checkboxes[Math.floor(Math.random() * checkboxes.length)];
+                    randomCheckbox.checked = true;
+                    validateGameStart();
+                }
+            });
+
+            // --- INICIALIZACIÓN ---
             const savedTheme = localStorage.getItem('imposterTheme') || 'default';
             themeSelect.value = savedTheme;
             applyTheme(savedTheme);
