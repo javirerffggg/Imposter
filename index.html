@@ -629,7 +629,7 @@
                 }
             } else if (gameRoles.detective === player.name) {
                 title = '🕵️ ¡Eres DETECTIVE!';
-                text = `La palabra es: "${secretWord}". ¡Acusa sabiamente!`;
+                text = `La palabra es: "${secretWord}".`;
             } else {
                 title = '👤 Eres un CIVIL';
                 text = `La palabra es: "${secretWord}"`;
@@ -689,7 +689,8 @@
             currentPlayerIndex = 0;
             
             playerNameInput.value = '';
-            document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false);
+            // No se desmarcan las categorías para que se mantengan en la siguiente ronda.
+            // document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false); 
             trollModeCheckbox.checked = false;
             detectiveModeCheckbox.checked = false;
             impostorHintCheckbox.checked = false;
