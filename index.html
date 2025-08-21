@@ -47,12 +47,23 @@
         .player-added-animation { animation: player-added 0.5s ease-out forwards; }
         @keyframes player-added { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
-        .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); } .bg-tertiary { background-color: var(--bg-tertiary); }
-        .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
-        .accent-primary { color: var(--accent-primary); } .bg-accent-primary { background-color: var(--bg-accent-primary); }
+        
+        /* Clases de colores para temas */
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .bg-accent-primary { background-color: var(--accent-primary); }
+        .bg-accent-secondary { background-color: var(--accent-secondary); }
+        .bg-accent-danger { background-color: var(--accent-danger); }
+
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-accent-primary { color: var(--accent-primary); }
+        .text-accent-secondary { color: var(--accent-secondary); }
+        .text-accent-danger { color: var(--accent-danger); }
+
         .border-accent-primary { border-color: var(--accent-primary); }
-        .accent-secondary { color: var(--accent-secondary); } .bg-accent-secondary { background-color: var(--accent-secondary); }
-        .accent-danger { color: var(--accent-danger); } .bg-accent-danger { background-color: var(--accent-danger); }
+        .ring-accent-primary { ring-color: var(--accent-primary); }
     </style>
 </head>
 <body>
@@ -61,7 +72,7 @@
     <div id="setup-screen" class="screen">
         <div class="w-full max-w-md text-center">
             <div class="flex items-center justify-center mb-4">
-                <h1 class="text-4xl sm:text-5xl font-bold accent-primary">Imposter Who?</h1>
+                <h1 class="text-4xl sm:text-5xl font-bold text-accent-primary">Imposter Who?</h1>
                 <button id="mute-btn" class="ml-4 p-2 bg-tertiary rounded-full hover:opacity-80 transition-opacity">
                     <svg id="music-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                     <svg id="music-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -129,7 +140,7 @@
                 </div>
                 <div class="card-face card-face-back absolute w-full h-full flex flex-col justify-center bg-secondary rounded-2xl shadow-lg p-6">
                     <div>
-                        <p class="text-sm accent-primary mb-2">Categoría: <span id="role-category"></span></p>
+                        <p class="text-sm text-accent-primary mb-2">Categoría: <span id="role-category"></span></p>
                         <h3 id="role-title" class="text-3xl sm:text-4xl font-bold mb-4"></h3>
                         <div id="role-word" class="text-2xl"></div>
                     </div>
@@ -142,7 +153,7 @@
     <!-- Pantalla de Juego en Curso -->
     <div id="in-game-screen" class="screen hidden">
         <div class="w-full max-w-md text-center">
-            <h2 class="text-4xl font-bold accent-primary mb-6">Partida en Curso</h2>
+            <h2 class="text-4xl font-bold text-accent-primary mb-6">Partida en Curso</h2>
             <p class="text-lg text-secondary mb-8">¡Hablad, dad pistas y descubrid al impostor!</p>
             <div class="bg-secondary p-4 sm:p-8 rounded-2xl shadow-lg">
                  <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
@@ -164,14 +175,14 @@
     <!-- Modals -->
     <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-secondary rounded-2xl p-6 max-w-sm text-center shadow-lg">
-            <h3 class="text-2xl font-bold accent-danger mb-4">Error</h3>
+            <h3 class="text-2xl font-bold text-accent-danger mb-4">Error</h3>
             <p id="error-message" class="text-secondary mb-6"></p>
             <button id="close-error-modal-btn" class="bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
         </div>
     </div>
     <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-secondary rounded-2xl p-6 max-w-lg w-full text-center shadow-lg">
-            <h3 class="text-3xl font-bold accent-primary mb-6">Estadísticas de Jugadores</h3>
+            <h3 class="text-3xl font-bold text-accent-primary mb-6">Estadísticas de Jugadores</h3>
             <div id="stats-container" class="max-h-80 overflow-y-auto text-left"></div>
             <button id="close-stats-modal-btn" class="mt-6 bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
         </div>
@@ -183,20 +194,9 @@
         </div>
     </div>
 
+    <script src="words.js"></script>
     <script>
         // --- CONSTANTES Y ESTADO DEL JUEGO ---
-        const LOCAL_WORD_CATEGORIES = {
-            "Animales": ["Perro", "Gato", "Elefante", "León", "Jirafa", "Tiburón", "Águila", "Serpiente", "Oso", "Lobo"],
-            "Comida": ["Pizza", "Hamburguesa", "Sushi", "Paella", "Taco", "Ensalada", "Pasta", "Helado", "Sopa", "Chocolate"],
-            "Profesiones": ["Médico", "Profesor", "Bombero", "Policía", "Cocinero", "Ingeniero", "Artista", "Astronauta", "Abogado", "Periodista"],
-            "Deportes": ["Fútbol", "Baloncesto", "Tenis", "Natación", "Béisbol", "Golf", "Boxeo", "Ciclismo", "Atletismo", "Rugby"],
-            "Películas Famosas": ["Titanic", "Star Wars", "El Padrino", "Jurassic Park", "Avatar", "Matrix", "El Señor de los Anillos", "Harry Potter", "Frozen", "Joker"],
-            "Países": ["España", "México", "Japón", "Egipto", "Brasil", "Canadá", "Australia", "Italia", "China", "Rusia"],
-            "Objetos de Casa": ["Silla", "Mesa", "Lámpara", "Sofá", "Cama", "Televisión", "Espejo", "Reloj", "Tenedor", "Ventana"],
-            "Instrumentos Musicales": ["Guitarra", "Piano", "Violín", "Batería", "Trompeta", "Flauta", "Saxofón", "Arpa", "Bajo", "Acordeón"],
-            "Superhéroes": ["Superman", "Batman", "Spiderman", "Iron Man", "Capitán América", "Thor", "Hulk", "Wonder Woman", "Aquaman", "Flash"],
-            "Videojuegos": ["Mario Bros", "Zelda", "Minecraft", "Fortnite", "Among Us", "Pac-Man", "Tetris", "Pokémon", "Sonic", "Grand Theft Auto"]
-        };
         const PLAYER_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899'];
         const TROLL_MODE_PROBABILITY = 0.15;
         
@@ -209,7 +209,8 @@
         let currentPlayerIndex = 0;
         let currentTheme = 'default';
         let isMuted = true;
-        let usedWords = {}; // Objeto para rastrear palabras usadas por categoría
+        let usedWords = {};
+        let lastRoundImpostors = [];
 
         // --- ELEMENTOS DEL DOM ---
         const screens = { setup: document.getElementById('setup-screen'), roleAssignment: document.getElementById('role-assignment-screen'), inGame: document.getElementById('in-game-screen'), reveal: document.getElementById('reveal-screen') };
@@ -229,7 +230,6 @@
         const muteBtn = document.getElementById('mute-btn');
         const musicOnIcon = document.getElementById('music-on-icon');
         const musicOffIcon = document.getElementById('music-off-icon');
-        // Modals
         const errorModal = document.getElementById('error-modal');
         const errorMessage = document.getElementById('error-message');
         const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
@@ -238,17 +238,14 @@
         const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
         const loadingModal = document.getElementById('loading-modal');
         const loadingMessage = document.getElementById('loading-message');
-        // Role Assignment
         const currentPlayerNameAssignment = document.getElementById('current-player-name-assignment');
         const roleCard = document.getElementById('role-card');
         const roleCategory = document.getElementById('role-category');
         const roleTitle = document.getElementById('role-title');
         const roleWord = document.getElementById('role-word');
         const nextPlayerBtn = document.getElementById('next-player-btn');
-        // In Game
         const revealImpostorBtn = document.getElementById('reveal-impostor-btn');
         const newGameBtnIngame = document.getElementById('new-game-btn-ingame');
-        // Reveal
         const revealInfo = document.getElementById('reveal-info');
         const newGameBtnReveal = document.getElementById('new-game-btn-reveal');
         const confettiCanvas = document.getElementById('confetti-canvas');
@@ -331,7 +328,7 @@
 
         // --- THEME MANAGEMENT ---
         function applyTheme(theme) {
-            document.body.className = `bg-primary text-primary theme-${theme}`;
+            document.body.className = `theme-${theme}`;
             currentTheme = theme;
             localStorage.setItem('imposterTheme', theme);
             playMusic(theme);
@@ -402,13 +399,14 @@
                 players.push({ name, color: selectedColor });
                 savePlayers();
                 playerNameInput.value = '';
-                updatePlayersList(true); // Animate the new player
+                updatePlayersList(true);
                 const usedColors = players.map(p => p.color);
                 const nextColor = PLAYER_COLORS.find(c => !usedColors.includes(c)) || PLAYER_COLORS[0];
                 selectedColor = nextColor;
                 document.querySelectorAll('.color-swatch').forEach(s => {
                     s.classList.toggle('selected', s.style.backgroundColor === selectedColor);
                 });
+                lastRoundImpostors = [];
             }
             playerNameInput.focus();
         }
@@ -463,7 +461,7 @@
         // Category Management
         function populateCategories() {
             categoryCheckboxes.innerHTML = '';
-            Object.keys(LOCAL_WORD_CATEGORIES).forEach(categoryName => {
+            Object.keys(WORD_CATEGORIES).forEach(categoryName => {
                 const categoryId = `category-${categoryName.replace(/\s+/g, '-')}`;
                 const label = document.createElement('label');
                 label.className = 'flex items-center space-x-2 text-primary p-2 bg-tertiary rounded-md cursor-pointer hover:opacity-80';
@@ -516,7 +514,7 @@
                             <p class="text-sm text-secondary">Victorias: ${stats.wins} / Derrotas: ${stats.losses}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-bold text-xl accent-primary">${winRate}%</p>
+                            <p class="font-bold text-xl text-accent-primary">${winRate}%</p>
                             <p class="text-xs text-gray-500">Win Rate</p>
                         </div>
                     `;
@@ -552,14 +550,13 @@
             
             selectedCategoryText = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
             
-            let wordPool = LOCAL_WORD_CATEGORIES[selectedCategoryText];
+            let wordPool = WORD_CATEGORIES[selectedCategoryText];
             if (!usedWords[selectedCategoryText]) {
                 usedWords[selectedCategoryText] = [];
             }
             let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText].includes(w));
 
             if (availableWords.length === 0) {
-                // Si se usaron todas las palabras de la categoría, se reinicia la lista de usadas para esa categoría
                 usedWords[selectedCategoryText] = [];
                 availableWords = wordPool;
             }
@@ -578,28 +575,44 @@
                 return;
             }
 
-            let playersToAssign = [...players];
-            shuffleArray(playersToAssign);
             gameRoles = { impostors: [], detective: null, civilians: [] };
 
             if (isTrollModeActive) {
                 gameRoles.impostors = players.map(p => p.name);
             } else {
+                const priorityCandidates = players.filter(p => !lastRoundImpostors.includes(p.name));
+                const secondaryCandidates = players.filter(p => lastRoundImpostors.includes(p.name));
+
+                shuffleArray(priorityCandidates);
+                shuffleArray(secondaryCandidates);
+
                 for (let i = 0; i < impostorCount; i++) {
-                    gameRoles.impostors.push(playersToAssign.pop().name);
+                    if (priorityCandidates.length > 0) {
+                        const newImpostor = priorityCandidates.pop();
+                        gameRoles.impostors.push(newImpostor.name);
+                    } else if (secondaryCandidates.length > 0) {
+                        const newImpostor = secondaryCandidates.pop();
+                        gameRoles.impostors.push(newImpostor.name);
+                    }
                 }
+
+                let remainingPlayers = players.filter(p => !gameRoles.impostors.includes(p.name));
+                shuffleArray(remainingPlayers);
+
                 if (useDetective) {
-                    gameRoles.detective = playersToAssign.pop().name;
+                    gameRoles.detective = remainingPlayers.pop().name;
                 }
-                gameRoles.civilians = playersToAssign.map(p => p.name);
+                gameRoles.civilians = remainingPlayers.map(p => p.name);
             }
             
+            lastRoundImpostors = [...gameRoles.impostors];
+
             setTimeout(() => {
                 hideModal(loadingModal);
                 currentPlayerIndex = 0;
                 showScreen('roleAssignment');
                 displayRoleForCurrentPlayer();
-            }, 500); // Pequeña demora para simular carga
+            }, 500);
         }
         
         function updateRoleCardContent() {
@@ -638,7 +651,7 @@
                 nextPlayerBtn.classList.add('hidden');
                 setTimeout(() => {
                     updateRoleCardContent();
-                }, 600); // Coincide con la duración de la transición CSS
+                }, 600);
             } else {
                 showScreen('inGame');
             }
@@ -656,14 +669,14 @@
 
             let html = '';
             if (isTrollModeActive) {
-                html += `<h3 class="text-4xl font-bold accent-danger mb-4">¡RONDA TROLL!</h3><p class="text-lg text-secondary">¡Todos erais impostores! La palabra "secreta" era <span class="font-bold accent-primary">${secretWord}</span>.</p>`;
+                html += `<h3 class="text-4xl font-bold text-accent-danger mb-4">¡RONDA TROLL!</h3><p class="text-lg text-secondary">¡Todos erais impostores! La palabra "secreta" era <span class="font-bold text-accent-primary">${secretWord}</span>.</p>`;
             } else {
                 const impostorText = gameRoles.impostors.length > 1 ? 'Los impostores eran' : 'El impostor era';
-                html += `<p class="text-lg text-secondary">${impostorText}: <span class="font-bold accent-danger">${gameRoles.impostors.join(', ')}</span></p>`;
+                html += `<p class="text-lg text-secondary">${impostorText}: <span class="font-bold text-accent-danger">${gameRoles.impostors.join(', ')}</span></p>`;
                 if(gameRoles.detective) {
-                    html += `<p class="text-lg text-secondary">El detective era: <span class="font-bold text-blue-400">${gameRoles.detective}</span></p>`;
+                    html += `<p class="text-lg text-secondary">El detective era: <span class="font-bold text-accent-secondary">${gameRoles.detective}</span></p>`;
                 }
-                html += `<p class="text-lg text-secondary">La palabra secreta era: <span class="font-bold accent-primary">${secretWord}</span></p>`;
+                html += `<p class="text-lg text-secondary">La palabra secreta era: <span class="font-bold text-accent-primary">${secretWord}</span></p>`;
             }
             revealInfo.innerHTML = html;
             showScreen('reveal');
@@ -738,7 +751,8 @@
             if (e.target.tagName === 'BUTTON') { 
                 players.splice(e.target.dataset.index, 1); 
                 savePlayers();
-                updatePlayersList(); 
+                updatePlayersList();
+                lastRoundImpostors = [];
             } 
         });
         selectAllCategoriesBtn.addEventListener('click', () => {
