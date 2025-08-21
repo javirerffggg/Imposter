@@ -97,12 +97,12 @@
                         <select id="impostor-count" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary"></select>
                     </div>
                     <div>
-                        <label for="theme-select" class="block mb-2 text-sm font-medium text-secondary">Tema Visual</label>
-                        <select id="theme-select" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary">
-                            <option value="default">Oscuro (Default)</option>
-                            <option value="space">Espacial</option>
-                            <option value="fantasy">Fantasía</option>
-                            <option value="noir">Noir</option>
+                        <label for="difficulty-select" class="block mb-2 text-sm font-medium text-secondary">Dificultad</label>
+                        <select id="difficulty-select" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary">
+                            <option value="random">Aleatoria</option>
+                            <option value="easy">Fácil</option>
+                            <option value="medium">Media</option>
+                            <option value="hard">Difícil</option>
                         </select>
                     </div>
                 </div>
@@ -154,10 +154,10 @@
     <div id="in-game-screen" class="screen hidden">
         <div class="w-full max-w-md text-center">
             <h2 class="text-4xl font-bold text-accent-primary mb-6">Partida en Curso</h2>
-            <p class="text-lg text-secondary mb-8">¡Hablad, dad pistas y descubrid al impostor!</p>
             <div class="bg-secondary p-4 sm:p-8 rounded-2xl shadow-lg">
-                 <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
-                 <button id="new-game-btn-ingame" class="w-full bg-tertiary hover:opacity-90 text-primary font-bold py-3 px-4 rounded-lg transition-colors">Nuevo Juego</button>
+                <p id="starting-player-text" class="text-xl text-secondary mb-6"></p>
+                <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
+                <button id="new-game-btn-ingame" class="w-full bg-tertiary hover:opacity-90 text-primary font-bold py-3 px-4 rounded-lg transition-colors">Nuevo Juego</button>
             </div>
         </div>
     </div>
@@ -218,6 +218,7 @@
         const addPlayerBtn = document.getElementById('add-player-btn');
         const playersList = document.getElementById('players-list');
         const impostorCountSelect = document.getElementById('impostor-count');
+        const difficultySelect = document.getElementById('difficulty-select');
         const categoryCheckboxes = document.getElementById('category-checkboxes');
         const selectAllCategoriesBtn = document.getElementById('select-all-categories-btn');
         const startGameBtn = document.getElementById('start-game-btn');
@@ -244,6 +245,7 @@
         const roleTitle = document.getElementById('role-title');
         const roleWord = document.getElementById('role-word');
         const nextPlayerBtn = document.getElementById('next-player-btn');
+        const startingPlayerText = document.getElementById('starting-player-text');
         const revealImpostorBtn = document.getElementById('reveal-impostor-btn');
         const newGameBtnIngame = document.getElementById('new-game-btn-ingame');
         const revealInfo = document.getElementById('reveal-info');
@@ -550,19 +552,26 @@
             
             selectedCategoryText = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
             
-            let wordPool = WORD_CATEGORIES[selectedCategoryText];
-            if (!usedWords[selectedCategoryText]) {
-                usedWords[selectedCategoryText] = [];
+            let difficulty = difficultySelect.value;
+            if (difficulty === 'random') {
+                const difficulties = ['easy', 'medium', 'hard'];
+                difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
             }
-            let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText].includes(w));
+
+            let wordPool = WORD_CATEGORIES[selectedCategoryText][difficulty];
+            
+            if (!usedWords[selectedCategoryText]) {
+                usedWords[selectedCategoryText] = { easy: [], medium: [], hard: [] };
+            }
+            let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText][difficulty].includes(w));
 
             if (availableWords.length === 0) {
-                usedWords[selectedCategoryText] = [];
+                usedWords[selectedCategoryText][difficulty] = [];
                 availableWords = wordPool;
             }
             
             secretWord = availableWords[Math.floor(Math.random() * availableWords.length)];
-            usedWords[selectedCategoryText].push(secretWord);
+            usedWords[selectedCategoryText][difficulty].push(secretWord);
 
             isTrollModeActive = trollModeCheckbox.checked && Math.random() < TROLL_MODE_PROBABILITY;
             
@@ -629,7 +638,7 @@
                 }
             } else if (gameRoles.detective === player.name) {
                 title = '🕵️ ¡Eres DETECTIVE!';
-                text = `La palabra es: "${secretWord}".`;
+                text = `La palabra es: "${secretWord}"`;
             } else {
                 title = '👤 Eres un CIVIL';
                 text = `La palabra es: "${secretWord}"`;
@@ -653,6 +662,17 @@
                     updateRoleCardContent();
                 }, 600);
             } else {
+                // Lógica para elegir quién empieza
+                const potentialStarters = players.filter(p => !gameRoles.impostors.includes(p.name));
+                
+                if (isTrollModeActive || potentialStarters.length === 0) {
+                    const randomPlayer = players[Math.floor(Math.random() * players.length)];
+                    startingPlayerText.innerHTML = `¡Ronda de locos! Empieza <span class="font-bold text-accent-primary">${randomPlayer.name}</span>.`;
+                } else {
+                    const startingPlayer = potentialStarters[Math.floor(Math.random() * potentialStarters.length)];
+                    startingPlayerText.innerHTML = `Empieza <span class="font-bold text-accent-primary">${startingPlayer.name}</span>.`;
+                }
+                
                 showScreen('inGame');
             }
         }
@@ -690,7 +710,6 @@
             
             playerNameInput.value = '';
             // No se desmarcan las categorías para que se mantengan en la siguiente ronda.
-            // document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false); 
             trollModeCheckbox.checked = false;
             detectiveModeCheckbox.checked = false;
             impostorHintCheckbox.checked = false;
