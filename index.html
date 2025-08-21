@@ -119,6 +119,7 @@
                 </div>
                 
                 <div class="text-left space-y-3 border-t border-gray-700 pt-4">
+                    <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="impostor-hint-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">💡 Pista para Impostores</span></label>
                     <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="troll-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">Modo Troll</span></label>
                     <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="detective-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">🕵️ Modo Detective</span></label>
                 </div>
@@ -140,7 +141,6 @@
                 </div>
                 <div class="card-face card-face-back absolute w-full h-full flex flex-col justify-center bg-secondary rounded-2xl shadow-lg p-6">
                     <div>
-                        <p class="text-sm text-accent-primary mb-2">Categoría: <span id="role-category"></span></p>
                         <h3 id="role-title" class="text-3xl sm:text-4xl font-bold mb-4"></h3>
                         <div id="role-word" class="text-2xl"></div>
                     </div>
@@ -222,6 +222,7 @@
         const selectAllCategoriesBtn = document.getElementById('select-all-categories-btn');
         const startGameBtn = document.getElementById('start-game-btn');
         const surpriseCategoryBtn = document.getElementById('surprise-category-btn');
+        const impostorHintCheckbox = document.getElementById('impostor-hint-checkbox');
         const trollModeCheckbox = document.getElementById('troll-mode-checkbox');
         const detectiveModeCheckbox = document.getElementById('detective-mode-checkbox');
         const colorPicker = document.getElementById('color-picker');
@@ -240,7 +241,6 @@
         const loadingMessage = document.getElementById('loading-message');
         const currentPlayerNameAssignment = document.getElementById('current-player-name-assignment');
         const roleCard = document.getElementById('role-card');
-        const roleCategory = document.getElementById('role-category');
         const roleTitle = document.getElementById('role-title');
         const roleWord = document.getElementById('role-word');
         const nextPlayerBtn = document.getElementById('next-player-btn');
@@ -618,15 +618,15 @@
         function updateRoleCardContent() {
             const player = players[currentPlayerIndex];
             currentPlayerNameAssignment.textContent = player.name;
-            roleCategory.textContent = selectedCategoryText;
 
             let title = '', text = '';
-            if (isTrollModeActive) {
-                title = '🤫 ¡MODO TROLL!';
-                text = '¡Todos sois impostores! Intenta sobrevivir.';
-            } else if (gameRoles.impostors.includes(player.name)) {
+            if (gameRoles.impostors.includes(player.name)) {
                 title = '🤫 ¡Eres IMPOSTOR!';
-                text = 'Descubre la palabra secreta.';
+                if (impostorHintCheckbox.checked && !isTrollModeActive) {
+                    text = `Pista: La categoría es <strong>${selectedCategoryText}</strong>.`;
+                } else {
+                    text = 'Descubre la palabra secreta.';
+                }
             } else if (gameRoles.detective === player.name) {
                 title = '🕵️ ¡Eres DETECTIVE!';
                 text = `La palabra es: "${secretWord}". ¡Acusa sabiamente!`;
@@ -692,6 +692,7 @@
             document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false);
             trollModeCheckbox.checked = false;
             detectiveModeCheckbox.checked = false;
+            impostorHintCheckbox.checked = false;
             validateGameStart();
             showScreen('setup');
         }
