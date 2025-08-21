@@ -1,5 +1,5 @@
 // Este archivo contiene todas las categorías y palabras para el juego Imposter Who?
-// Las palabras están ahora divididas por dificultad dentro de cada categoría.
+// Las palabras están ahora divididas por dificultad dentro de cajda categoría.
 // Cada categoría contiene más de 100 palabras comunes.
 
 const WORD_CATEGORIES = {
