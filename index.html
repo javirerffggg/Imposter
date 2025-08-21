@@ -194,6 +194,7 @@
         </div>
     </div>
 
+    <!-- Carga el diccionario de palabras ANTES que el script principal del juego -->
     <script src="words.js"></script>
     <script>
         // --- CONSTANTES Y ESTADO DEL JUEGO ---
@@ -662,7 +663,6 @@
                     updateRoleCardContent();
                 }, 600);
             } else {
-                // Lógica para elegir quién empieza
                 const potentialStarters = players.filter(p => !gameRoles.impostors.includes(p.name));
                 
                 if (isTrollModeActive || potentialStarters.length === 0) {
@@ -709,7 +709,7 @@
             currentPlayerIndex = 0;
             
             playerNameInput.value = '';
-            // No se desmarcan las categorías para que se mantengan en la siguiente ronda.
+            
             trollModeCheckbox.checked = false;
             detectiveModeCheckbox.checked = false;
             impostorHintCheckbox.checked = false;
