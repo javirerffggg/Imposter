@@ -226,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-player-name').textContent = assignment.player.name;
         let title = '', description = '';
         
-        // CORRECCIÓN: Añadir la categoría a los roles que conocen la palabra
         const categoryInfo = `<br><span class="text-sm text-[var(--text-dark)]">Categoría: ${state.currentRound.category}</span>`;
 
         switch(assignment.role) {
@@ -452,6 +451,8 @@ document.addEventListener('DOMContentLoaded', () => {
             nextPlayerBtn.classList.add('hidden');
             setTimeout(displayCurrentPlayerRole, 400);
         } else {
+            // CORRECCIÓN: Añadir la línea que faltaba para actualizar el nombre del jugador inicial
+            startingPlayerName.textContent = state.currentRound.startingPlayer.name;
             showScreen('in-game');
         }
     });
