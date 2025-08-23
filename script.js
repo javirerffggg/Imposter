@@ -443,24 +443,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     accusationBtn.addEventListener('click', revealRolesWithoutVoting);
 
-    nextPlayerBtn.addEventListener('click', () => {
-        soundManager.playClick();
-        state.currentRound.currentPlayerIndex++;
-        if (state.currentRound.currentPlayerIndex < state.currentRound.assignments.length) {
-            roleCard.classList.remove('is-flipped');
-            nextPlayerBtn.classList.add('hidden');
-            setTimeout(displayCurrentPlayerRole, 400);
-        } else {
-            // CORRECCIÓN: Añadir la línea que faltaba para actualizar el nombre del jugador inicial
-            startingPlayerName.textContent = state.currentRound.startingPlayer.name;
-            showScreen('in-game');
-        }
-    });
     roleCard.addEventListener('click', () => {
         if(roleCard.classList.contains('is-flipped')) return;
         soundManager.playCardFlip();
         roleCard.classList.add('is-flipped');
+
+        // CORRECCIÓN: Lógica para cambiar el texto del botón
+        if (state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length - 1) {
+            nextPlayerBtn.textContent = 'Empezar Partida';
+        } else {
+            nextPlayerBtn.textContent = 'Siguiente Jugador';
+        }
         nextPlayerBtn.classList.remove('hidden');
+    });
+
+    nextPlayerBtn.addEventListener('click', () => {
+        soundManager.playClick();
+        state.currentRound.currentPlayerIndex++;
+        
+        const isLastPlayer = state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length;
+
+        if (isLastPlayer) {
+            // CORRECCIÓN: El error estaba aquí. Se debe actualizar el nombre y LUEGO mostrar la pantalla.
+            startingPlayerName.textContent = state.currentRound.startingPlayer.name;
+            showScreen('in-game');
+        } else {
+            roleCard.classList.remove('is-flipped');
+            nextPlayerBtn.classList.add('hidden');
+            setTimeout(displayCurrentPlayerRole, 400);
+        }
     });
     
     customListsBtn.addEventListener('click', () => showScreen('customLists'));
