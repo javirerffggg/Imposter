@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setup: document.getElementById('setup-screen'),
         roleAssignment: document.getElementById('role-assignment-screen'),
         inGame: document.getElementById('in-game-screen'),
-        accusation: document.getElementById('accusation-screen'),
+        // accusation: document.getElementById('accusation-screen'), // Eliminado del flujo
         reveal: document.getElementById('reveal-screen'),
         customLists: document.getElementById('custom-lists-screen'),
     };
@@ -31,14 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleDescription = document.getElementById('role-description');
     const nextPlayerBtn = document.getElementById('next-player-btn');
     const startingPlayerName = document.getElementById('starting-player-name');
-    const accusationBtn = document.getElementById('accusation-btn');
+    const accusationBtn = document.getElementById('accusation-btn'); // Este botón ahora revela los roles
     const newGameBtn = document.getElementById('new-game-btn');
     const revealWord = document.getElementById('reveal-word');
     const revealImpostorsList = document.getElementById('reveal-impostors-list');
     const playAgainBtn = document.getElementById('play-again-btn');
     const roundEventBanner = document.getElementById('round-event-banner');
     const roundEventText = document.getElementById('round-event-text');
-    const accusationPlayerList = document.getElementById('accusation-player-list');
+    // const accusationPlayerList = document.getElementById('accusation-player-list'); // Ya no se usa
     const winLossOverlay = document.getElementById('win-loss-overlay');
     
     // Modales y sus botones
@@ -241,6 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const wordPool = getWordPool();
         if (wordPool.length === 0) { alert("Por favor, selecciona al menos una categoría con palabras."); return; }
         
+        // CORRECCIÓN: Asegurarse de que la tarjeta esté boca abajo al iniciar
+        roleCard.classList.remove('is-flipped');
+        nextPlayerBtn.classList.add('hidden');
+
         const selectedCategoryName = Array.from(state.gameSettings.selectedCategories)[0];
         state.currentRound.isCustomCategory = !!getCustomLists().find(l => l.category === selectedCategoryName);
         state.currentRound.word = wordPool[Math.floor(Math.random() * wordPool.length)];
@@ -264,46 +268,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Lógica de Fin de Partida ---
     
     /**
-     * Procesa el final de la partida después de una acusación.
-     * @param {string} eliminatedPlayerName - El nombre del jugador eliminado.
-     * @returns {void}
+     * Muestra la pantalla de revelación sin votación.
      */
-    function handleAccusation(eliminatedPlayerName) {
-        state.currentRound.eliminatedPlayer = eliminatedPlayerName;
-        const eliminatedAssignment = state.currentRound.assignments.find(a => a.player.name === eliminatedPlayerName);
-        let winner = '';
-        let overlayText = '';
-        let overlayGradient = '';
-
-        if (eliminatedAssignment.role === ROLES.JESTER) {
-            winner = ROLES.JESTER;
-            overlayText = '¡EL BUFÓN GANA!';
-            overlayGradient = 'from-yellow-400 to-orange-500';
-            soundManager.playWin();
-        } else {
-            const impostors = state.currentRound.assignments.filter(a => a.role === ROLES.IMPOSTOR);
-            const impostorWasEliminated = impostors.some(i => i.player.name === eliminatedPlayerName);
-            if (impostorWasEliminated || impostors.length === 0) {
-                winner = ROLES.INNOCENT;
-                overlayText = '¡INOCENTES GANAN!';
-                overlayGradient = 'from-blue-400 to-green-400';
-                soundManager.playWin();
-            } else {
-                winner = ROLES.IMPOSTOR;
-                overlayText = '¡IMPOSTORES GANAN!';
-                overlayGradient = 'from-red-500 to-purple-600';
-                soundManager.playLose();
+    function revealRolesWithoutVoting() {
+        // Actualiza la estadística de partidas jugadas para todos en la ronda
+        state.players.forEach(p => {
+            const player = getPlayerByName(p.name);
+            if (player) {
+                player.stats.games++;
             }
-        }
-        updateAllStats(winner);
-        showWinLossOverlay(overlayText, overlayGradient);
-        setTimeout(showRevealScreen, 3000);
-    }
+        });
+        saveMasterPlayerList();
 
-    function showWinLossOverlay(text, gradientClass) {
-        winLossOverlay.textContent = text;
-        winLossOverlay.className = `fixed inset-0 flex items-center justify-center text-white text-6xl md:text-8xl font-bold uppercase tracking-widest animate-fade-in-down bg-gradient-to-br ${gradientClass}`;
-        winLossOverlay.classList.remove('hidden');
+        // Muestra la pantalla de revelación
+        showRevealScreen();
     }
 
     function showRevealScreen() {
@@ -315,34 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('reveal');
     }
     
-    /**
-     * Actualiza las estadísticas de todos los jugadores al final de la partida.
-     * @param {string} winner - El rol o bando ganador ('Inocente', 'Impostor', 'Bufón').
-     * @returns {void}
-     */
-    function updateAllStats(winner) {
-        state.currentRound.assignments.forEach(a => {
-            const player = getPlayerByName(a.player.name);
-            if (!player) return;
-            player.stats.games++;
-            let isWinner = false;
-            if (winner === ROLES.JESTER && a.role === ROLES.JESTER) { player.stats.winsAsJester++; isWinner = true; }
-            if (winner === ROLES.INNOCENT && ![ROLES.IMPOSTOR, ROLES.JESTER, ROLES.SABOTEUR].includes(a.role)) { player.stats.winsAsInnocent++; isWinner = true; }
-            if (winner === ROLES.IMPOSTOR && a.role === ROLES.IMPOSTOR) { player.stats.winsAsImpostor++; isWinner = true; }
-            
-            checkAndUnlockAchievements(player, isWinner, a.role);
-        });
-        saveMasterPlayerList();
-    }
-
     // --- Lógica de Logros ---
-    /**
-     * Comprueba si un jugador ha desbloqueado algún logro.
-     * @param {object} player - El objeto completo del jugador de `masterPlayerList`.
-     * @param {boolean} isWinner - Si el jugador ganó la partida.
-     * @param {string} role - El rol del jugador en la partida.
-     * @returns {void}
-     */
+    // La lógica de logros permanece, pero no se activará sin un ganador/perdedor.
+    // Esto es intencional según el nuevo flujo de juego sin votación.
     function checkAndUnlockAchievements(player, isWinner, role) {
         const context = {
             votesAgainst: state.currentRound.eliminatedPlayer === player.name ? 1 : 0,
@@ -444,18 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
     
-    // --- Lógica de Acusación ---
-    function renderAccusationList() {
-        accusationPlayerList.innerHTML = '';
-        state.players.forEach(player => {
-            const button = document.createElement('button');
-            button.className = 'w-full p-3 bg-[var(--bg-main)] rounded-lg text-lg hover:bg-[var(--accent-secondary)] transition-colors';
-            button.textContent = player.name;
-            button.dataset.playerName = player.name;
-            accusationPlayerList.appendChild(button);
-        });
-    }
-
     // --- Inicialización ---
     function init() {
         resetGameSettings();
@@ -480,12 +421,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     startGameBtn.addEventListener('click', startGame);
-    accusationBtn.addEventListener('click', () => { renderAccusationList(); showScreen('accusation'); });
-    accusationPlayerList.addEventListener('click', (e) => {
-        if (e.target.dataset.playerName) {
-            handleAccusation(e.target.dataset.playerName);
-        }
-    });
+    
+    // CORRECCIÓN: El botón de acusación ahora revela los roles directamente
+    accusationBtn.addEventListener('click', revealRolesWithoutVoting);
+
     nextPlayerBtn.addEventListener('click', () => {
         soundManager.playClick();
         state.currentRound.currentPlayerIndex++;
@@ -583,9 +522,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('setup');
     });
 
+    // CORRECCIÓN: El botón "Nuevo Juego" ahora mantiene a los jugadores
     newGameBtn.addEventListener('click', () => {
-        state.players = [];
         resetCurrentRound();
+        // state.players = []; // Esta línea se ha eliminado para mantener a los jugadores
         renderPlayers();
         showScreen('setup');
     });
@@ -595,7 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedPlayers = [];
         let selectionPool = players.map(p => {
             const masterP = getPlayerByName(p.name);
-            // Si el jugador no se encuentra por alguna razón, se le da peso normal.
             const wasImpostor = masterP ? masterP.wasImpostor : false;
             return { player: p, weight: wasImpostor ? 1 : 3 };
         });
@@ -621,7 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Actualizar `wasImpostor` para la siguiente ronda
         masterPlayerList.forEach(mp => {
             mp.wasImpostor = selectedPlayers.some(sp => sp.name === mp.name);
         });
