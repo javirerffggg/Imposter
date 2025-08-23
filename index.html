@@ -5,160 +5,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imposter Who?</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&family=Poppins:wght@600;700&family=Press+Start+2P&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a202c">
+    <meta name="theme-color" content="#12182B">
     <style>
+        :root {
+            --bg-main: #12182B;
+            --bg-card: #1E293B;
+            --accent-primary: #22D3EE;
+            --accent-secondary: #8B5CF6;
+            --role-impostor: #F43F5E;
+            --role-detective: #3B82F6;
+            --text-light: #E2E8F0;
+            --text-dark: #94A3B8;
+            --font-title: 'Poppins', sans-serif;
+            --font-body: 'Nunito Sans', sans-serif;
+        }
+        
+        body.theme-noir {
+            --bg-main: #1a1a1a;
+            --bg-card: #2b2b2b;
+            --accent-primary: #E5E5E5;
+            --accent-secondary: #f43f5e;
+            --text-light: #E5E5E5;
+            --text-dark: #a1a1a1;
+            --font-title: 'Merriweather', serif;
+            --font-body: 'Merriweather', serif;
+        }
+
+        body.theme-retro {
+            --bg-main: #0D0D0D;
+            --bg-card: #1A1A1A;
+            --accent-primary: #00FF00;
+            --accent-secondary: #FF00FF;
+            --role-impostor: #FF0000;
+            --role-detective: #00FFFF;
+            --text-light: #FFFFFF;
+            --text-dark: #AAAAAA;
+            --font-title: 'Press Start 2P', cursive;
+            --font-body: 'Press Start 2P', cursive;
+        }
+
+        body.theme-manuscript {
+            --bg-main: #fdf6e3;
+            --bg-card: #eee8d5;
+            --accent-primary: #268bd2;
+            --accent-secondary: #d33682;
+            --role-impostor: #dc322f;
+            --role-detective: #2aa198;
+            --text-light: #586e75;
+            --text-dark: #839496;
+            --font-title: 'Merriweather', serif;
+            --font-body: 'Merriweather', serif;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231E293B' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3C/g%3E%3C/svg%3E");
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
-        .scene {
-            perspective: 1000px;
-        }
-        .card {
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        .card.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .card__face {
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-        }
-        .card__face--back {
-            transform: rotateY(180deg);
-        }
-        /* Estilos para checkboxes personalizados */
-        .custom-checkbox:checked {
-            background-color: #4a5568;
-            border-color: #4a5568;
-        }
-        .custom-checkbox:checked::after {
-            content: '✔';
-            color: white;
-            display: block;
-            text-align: center;
-            line-height: 1.25rem;
-        }
+
+        h1, h2, h3 { font-family: var(--font-title); }
+        .screen { transition: opacity 0.4s ease-in-out; }
+        .scene { perspective: 1000px; }
+        .card { transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card__face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+        .card__face--back { transform: rotateY(180deg); }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-down { animation: fadeInDown 0.5s ease-out forwards; }
+        @keyframes pulseGlow { 0%, 100% { text-shadow: 0 0 8px var(--accent-primary), 0 0 16px var(--accent-primary); } 50% { text-shadow: 0 0 16px var(--accent-primary), 0 0 32px var(--accent-primary); } }
+        .animate-pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
+
+        .custom-checkbox:checked { background-color: var(--accent-primary); border-color: var(--accent-primary); }
+        .custom-checkbox:checked::after { content: '✔'; color: var(--bg-main); display: block; text-align: center; line-height: 1.25rem; font-weight: bold; }
+        .category-label:has(.custom-checkbox:checked) span { color: var(--accent-primary); font-weight: 600; }
+        .gradient-hr { border: none; height: 1px; background: linear-gradient(to right, transparent, var(--accent-primary), transparent); }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
     <div id="app" class="w-full max-w-md mx-auto">
-
-        <!-- Pantalla 1: Configuración de la Partida -->
-        <div id="setup-screen" class="space-y-6">
-            <h1 class="text-4xl font-bold text-center text-gray-300">Imposter Who?</h1>
+        <!-- Pantallas del juego -->
+        <div id="setup-screen" class="space-y-8">
+            <!-- Contenido de la pantalla de configuración -->
+            <h1 class="text-5xl font-bold text-center text-gray-200 tracking-wider">Imposter Who?</h1>
             
-            <!-- Gestión de Jugadores -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-3">Jugadores</h2>
-                <div class="flex gap-2">
-                    <input type="text" id="player-name-input" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nombre del jugador...">
-                    <button id="add-player-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Añadir</button>
+            <div class="bg-[var(--bg-card)] p-6 rounded-xl border border-gray-700/50 shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-300">Jugadores</h2>
+                <div class="flex gap-3">
+                    <div class="relative w-full">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </span>
+                        <input type="text" id="player-name-input" class="w-full bg-[var(--bg-main)] text-[var(--text-light)] border border-gray-600 rounded-lg px-3 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)] transition-all" placeholder="Nombre del jugador...">
+                    </div>
+                    <button id="add-player-btn" class="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-105 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Añadir
+                    </button>
                 </div>
-                <ul id="players-list" class="mt-3 space-y-2">
-                    <!-- Jugadores añadidos dinámicamente -->
-                </ul>
+                <ul id="players-list" class="mt-4 space-y-2"></ul>
             </div>
-
-            <!-- Opciones de Partida -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-3">Opciones</h2>
+            <!-- Resto de la pantalla de configuración -->
+             <div class="bg-[var(--bg-card)] p-6 rounded-xl border border-gray-700/50 shadow-lg space-y-4">
+                <h2 class="text-2xl font-semibold text-gray-300">Opciones</h2>
                 <div class="flex items-center justify-between">
                     <label for="impostor-count" class="text-gray-300">Número de Impostores:</label>
-                    <select id="impostor-count" class="bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2">
+                    <select id="impostor-count" class="bg-[var(--bg-main)] text-[var(--text-light)] border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]">
                         <option value="1">1</option>
                         <option value="2" disabled>2</option>
                     </select>
                 </div>
             </div>
-
-            <!-- Selección de Categorías -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-xl font-semibold">Categorías</h2>
-                    <button id="toggle-categories-btn" class="text-sm text-blue-400 hover:underline">Seleccionar Todas</button>
+            <div class="bg-[var(--bg-card)] p-6 rounded-xl border border-gray-700/50 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-semibold text-gray-300">Categorías</h2>
+                    <button id="toggle-categories-btn" class="text-sm text-[var(--accent-secondary)] hover:underline font-semibold">Seleccionar Todas</button>
                 </div>
-                <div id="categories-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    <!-- Categorías añadidas dinámicamente -->
-                </div>
+                <div id="categories-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-48 overflow-y-auto pr-2"></div>
             </div>
-
-            <!-- Modos de Juego Especiales -->
-            <div class="bg-gray-800 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-3">Modos Especiales</h2>
-                <div class="space-y-2">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="impostor-hint-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
-                        <span>Pista para el Impostor (si empieza)</span>
+            <div class="bg-[var(--bg-card)] p-6 rounded-xl border border-gray-700/50 shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-300">Modos Especiales</h2>
+                <div class="space-y-3">
+                    <label class="flex items-center gap-3 cursor-pointer category-label">
+                        <input type="checkbox" id="impostor-hint-mode" class="appearance-none w-5 h-5 bg-[var(--bg-main)] rounded-sm border border-gray-600 custom-checkbox transition-all">
+                        <span>Pista para el Impostor</span>
                     </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="troll-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
-                        <span>Modo Troll (15% todos impostores)</span>
+                     <label class="flex items-center gap-3 cursor-pointer category-label">
+                        <input type="checkbox" id="troll-mode" class="appearance-none w-5 h-5 bg-[var(--bg-main)] rounded-sm border border-gray-600 custom-checkbox transition-all">
+                        <span>Modo Troll</span>
                     </label>
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="saboteur-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                    <label class="flex items-center gap-3 cursor-pointer category-label">
+                        <input type="checkbox" id="saboteur-mode" class="appearance-none w-5 h-5 bg-[var(--bg-main)] rounded-sm border border-gray-600 custom-checkbox transition-all">
                         <span>Modo Saboteador</span>
                     </label>
-                     <label class="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" id="detective-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                     <label class="flex items-center gap-3 cursor-pointer category-label">
+                        <input type="checkbox" id="detective-mode" class="appearance-none w-5 h-5 bg-[var(--bg-main)] rounded-sm border border-gray-600 custom-checkbox transition-all">
                         <span>Modo Detective</span>
                     </label>
                 </div>
             </div>
-
-            <button id="start-game-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">Asignar Roles</button>
+            <button id="start-game-btn" class="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold text-lg py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 disabled:bg-gray-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed disabled:scale-100 tracking-wider">Asignar Roles</button>
         </div>
-
-        <!-- Pantalla 2: Asignación de Roles -->
         <div id="role-assignment-screen" class="hidden text-center space-y-6">
-            <h2 class="text-2xl font-bold">Es el turno de <span id="current-player-name" class="text-yellow-400"></span></h2>
-            <p class="text-gray-400">Pasa el dispositivo. Haz clic en la tarjeta para ver tu rol y palabra secreta.</p>
-            <div class="scene w-full h-64">
+            <h2 class="text-3xl font-bold">Turno de: <span id="current-player-name" class="text-[var(--accent-primary)]"></span></h2>
+            <p class="text-[var(--text-dark)]">Haz clic en la tarjeta para ver tu rol.</p>
+            <div class="scene w-full h-72">
                 <div id="role-card" class="card w-full h-full cursor-pointer">
-                    <div class="card__face card__face--front absolute w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
-                        <span class="text-2xl font-bold">Haz Clic para Revelar</span>
+                    <div class="card__face card__face--front absolute w-full h-full bg-[var(--bg-card)] rounded-xl flex items-center justify-center border-2 border-dashed border-gray-600">
+                        <span class="text-8xl font-bold text-gray-700/50 animate-pulse-glow">?</span>
                     </div>
-                    <div id="role-card-back" class="card__face card__face--back absolute w-full h-full bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center space-y-4">
-                        <h3 id="role-title" class="text-3xl font-bold"></h3>
-                        <p id="role-description" class="text-lg"></p>
-                        <button id="hint-button" class="hidden bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-md transition-colors">Pedir Pista</button>
+                    <div id="role-card-back" class="card__face card__face--back absolute w-full h-full bg-[var(--bg-card)] rounded-xl p-6 flex flex-col items-center justify-center space-y-4 border border-gray-700/50">
+                         <h3 id="role-title" class="text-4xl font-bold tracking-widest uppercase"></h3>
+                         <hr class="w-3/4 gradient-hr my-2">
+                        <p id="role-description" class="text-lg text-gray-300"></p>
+                        <button id="hint-button" class="hidden bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-md transition-colors mt-4">Pedir Pista</button>
                     </div>
                 </div>
             </div>
-            <button id="next-player-btn" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Siguiente Jugador</button>
+            <button id="next-player-btn" class="hidden w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Siguiente Jugador</button>
         </div>
-
-        <!-- Pantalla 3: Partida en Curso -->
         <div id="in-game-screen" class="hidden text-center space-y-8">
             <h2 class="text-3xl font-bold text-gray-300">¡La partida ha comenzado!</h2>
             <p class="text-xl">Empieza la discusión: <span id="starting-player-name" class="text-green-400 font-semibold"></span></p>
             <div class="space-y-4">
-                <button id="reveal-roles-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Revelar Roles</button>
-                <button id="new-game-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Nuevo Juego</button>
+                <button id="reveal-roles-btn" class="w-full bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--role-impostor)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Revelar Roles</button>
+                <button id="new-game-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-colors">Nuevo Juego</button>
             </div>
         </div>
-
-        <!-- Pantalla 4: Revelación Final -->
-        <div id="reveal-screen" class="hidden text-center space-y-6 bg-gray-800 p-6 rounded-lg">
-            <h2 class="text-3xl font-bold text-gray-300">Resultados Finales</h2>
-            <div class="text-left space-y-3">
-                <p class="text-lg">La palabra era: <strong id="reveal-word" class="text-yellow-400"></strong></p>
-                <div id="reveal-impostors-container">
-                    <p class="text-lg">Impostor(es):</p>
-                    <ul id="reveal-impostors-list" class="list-disc list-inside text-red-400">
-                        <!-- Lista de impostores -->
-                    </ul>
+        <div id="reveal-screen" class="hidden text-center space-y-6 bg-[var(--bg-card)] p-8 rounded-xl border border-gray-700/50">
+            <h2 class="text-4xl font-bold text-gray-300">Resultados</h2>
+            <div class="text-left space-y-4 text-lg">
+                <p>La palabra era: <strong id="reveal-word" class="text-yellow-400 font-bold opacity-0"></strong></p>
+                <div id="reveal-impostors-container" class="opacity-0">
+                    <p>Impostor(es):</p>
+                    <ul id="reveal-impostors-list" class="list-disc list-inside text-[var(--role-impostor)] font-semibold"></ul>
                 </div>
-                <div id="reveal-saboteur-container" class="hidden">
-                    <p class="text-lg">Saboteador: <strong id="reveal-saboteur" class="text-orange-400"></strong></p>
+                <div id="reveal-saboteur-container" class="hidden opacity-0">
+                    <p>Saboteador: <strong id="reveal-saboteur" class="text-orange-400 font-semibold"></strong></p>
                 </div>
-                <div id="reveal-detective-container" class="hidden">
-                    <p class="text-lg">Detective: <strong id="reveal-detective" class="text-blue-400"></strong></p>
+                <div id="reveal-detective-container" class="hidden opacity-0">
+                    <p>Detective: <strong id="reveal-detective" class="text-[var(--role-detective)] font-semibold"></strong></p>
                 </div>
             </div>
-            <button id="play-again-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Jugar de Nuevo</button>
+            <button id="play-again-btn" class="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <!-- Icono de Configuración y Modal de Temas -->
+    <div class="fixed top-4 right-4">
+        <button id="settings-btn" class="text-gray-400 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+    </div>
+
+    <div id="theme-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+        <div class="bg-[var(--bg-card)] p-6 rounded-xl border border-gray-700/50 shadow-2xl w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-4">Seleccionar Tema</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <button class="theme-btn border-2 p-4 rounded-lg" data-theme="default">Neón</button>
+                <button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-noir">Noir</button>
+                <button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-retro">Retro</button>
+                <button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-manuscript">Manuscrito</button>
+            </div>
+            <button id="close-modal-btn" class="w-full mt-6 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">Cerrar</button>
         </div>
     </div>
 
