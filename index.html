@@ -95,7 +95,6 @@
             <button id="start-game-btn" class="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold text-lg py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 disabled:bg-gray-600 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed disabled:scale-100 tracking-wider">Asignar Roles</button>
         </div>
         
-        <!-- Otras pantallas (role-assignment, in-game, etc.) -->
         <div id="role-assignment-screen" class="hidden text-center space-y-6">
             <h2 class="text-3xl font-bold">Turno de: <span id="current-player-name" class="text-[var(--accent-primary)]"></span></h2>
             <p class="text-[var(--text-dark)]">Haz clic en la tarjeta para ver tu rol.</p>
@@ -122,7 +121,8 @@
             <h2 class="text-3xl font-bold text-gray-300">¡La partida ha comenzado!</h2>
             <p class="text-xl">Empieza la discusión: <span id="starting-player-name" class="text-green-400 font-semibold"></span></p>
             <div class="space-y-4">
-                <button id="accusation-btn" class="w-full bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--role-impostor)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Votación Final</button>
+                <!-- CORRECCIÓN: Texto del botón cambiado -->
+                <button id="accusation-btn" class="w-full bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--role-impostor)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Revelar Roles</button>
                 <button id="new-game-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-colors">Nuevo Juego</button>
             </div>
         </div>
@@ -136,12 +136,13 @@
         <div id="reveal-screen" class="hidden text-center space-y-6 bg-[var(--bg-card)] p-8 rounded-xl border border-gray-700/50">
             <h2 class="text-4xl font-bold text-gray-300">Resultados</h2>
             <div class="text-left space-y-4 text-lg">
-                <p>La palabra era: <strong id="reveal-word" class="text-yellow-400 font-bold opacity-0"></strong></p>
-                <div id="reveal-impostors-container" class="opacity-0">
+                <!-- CORRECCIÓN: Se ha eliminado opacity-0 para que el contenido sea visible -->
+                <p>La palabra era: <strong id="reveal-word" class="text-yellow-400 font-bold"></strong></p>
+                <div id="reveal-impostors-container">
                     <p>Impostor(es):</p>
                     <ul id="reveal-impostors-list" class="list-disc list-inside text-[var(--role-impostor)] font-semibold"></ul>
                 </div>
-                <!-- Otros roles revelados -->
+                <!-- Aquí se podrían añadir los otros roles revelados si se desea -->
             </div>
             <button id="play-again-btn" class="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Jugar de Nuevo</button>
         </div>
@@ -161,10 +162,10 @@
 
     <!-- Iconos de menú y Modales -->
     <div class="fixed top-4 right-4 flex gap-3">
-        <button id="rules-btn" class="menu-btn"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></button>
-        <button id="achievements-btn" class="menu-btn"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.55 3.32a10 10 0 1 1-5.1 17.4"/><path d="m14 6-4.27 4.27a1 1 0 0 0 0 1.42L14 16"/><path d="M18 10h-5.27"/><path d="M6 18H5c-1.1 0-2-.9-2-2v-1c0-1.1.9-2 2-2h1"/></svg></button>
-        <button id="custom-lists-btn" class="menu-btn"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></button>
-        <button id="settings-btn" class="menu-btn"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+        <button id="rules-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></button>
+        <button id="achievements-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.55 3.32a10 10 0 1 1-5.1 17.4"/><path d="m14 6-4.27 4.27a1 1 0 0 0 0 1.42L14 16"/><path d="M18 10h-5.27"/><path d="M6 18H5c-1.1 0-2-.9-2-2v-1c0-1.1.9-2 2-2h1"/></svg></button>
+        <button id="custom-lists-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></button>
+        <button id="settings-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
     <!-- Modales -->
