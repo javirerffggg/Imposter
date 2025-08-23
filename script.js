@@ -225,13 +225,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const assignment = state.currentRound.assignments[state.currentRound.currentPlayerIndex];
         document.getElementById('current-player-name').textContent = assignment.player.name;
         let title = '', description = '';
+        
+        // CORRECCIÓN: Añadir la categoría a los roles que conocen la palabra
+        const categoryInfo = `<br><span class="text-sm text-[var(--text-dark)]">Categoría: ${state.currentRound.category}</span>`;
+
         switch(assignment.role) {
-            case ROLES.IMPOSTOR: title = '🤫 ¡Eres IMPOSTOR!'; description = 'Descubre la palabra secreta.'; if(state.gameSettings.impostorCount > 0) soundManager.playRevealImpostor(); break;
-            case ROLES.JESTER: title = '🃏 ¡Eres BUFÓN!'; description = '¡Consigue que te eliminen para ganar!'; break;
-            case ROLES.MIME: title = '🤐 ¡Eres MIMO!'; description = `La palabra es <strong>${assignment.word}</strong>. ¡NO PUEDES HABLAR!`; break;
-            case ROLES.SABOTEUR: title = '💣 ¡Eres SABOTEADOR!'; description = `Tu palabra es: <strong>${assignment.word}</strong>.`; break;
-            case ROLES.DETECTIVE: title = '🕵️ ¡Eres DETECTIVE!'; description = `La palabra es: <strong>${assignment.word}</strong>.`; break;
-            default: title = '😇 Eres INOCENTE'; description = `La palabra es: <strong>${assignment.word}</strong>.`; break;
+            case ROLES.IMPOSTOR:
+                title = '🤫 ¡Eres IMPOSTOR!';
+                description = 'Descubre la palabra secreta.';
+                if(state.gameSettings.impostorCount > 0) soundManager.playRevealImpostor();
+                break;
+            case ROLES.JESTER:
+                title = '🃏 ¡Eres BUFÓN!';
+                description = '¡Consigue que te eliminen para ganar!';
+                break;
+            case ROLES.MIME:
+                title = '🤐 ¡Eres MIMO!';
+                description = `La palabra es <strong>${assignment.word}</strong>. ¡NO PUEDES HABLAR!${categoryInfo}`;
+                break;
+            case ROLES.SABOTEUR:
+                title = '💣 ¡Eres SABOTEADOR!';
+                description = `Tu palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                break;
+            case ROLES.DETECTIVE:
+                title = '🕵️ ¡Eres DETECTIVE!';
+                description = `La palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                break;
+            default: // INNOCENT
+                title = '😇 Eres INOCENTE';
+                description = `La palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                break;
         }
         roleTitle.innerHTML = title;
         roleDescription.innerHTML = description;
@@ -241,13 +264,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const wordPool = getWordPool();
         if (wordPool.length === 0) { alert("Por favor, selecciona al menos una categoría con palabras."); return; }
         
-        // CORRECCIÓN: Asegurarse de que la tarjeta esté boca abajo al iniciar
         roleCard.classList.remove('is-flipped');
         nextPlayerBtn.classList.add('hidden');
 
-        const selectedCategoryName = Array.from(state.gameSettings.selectedCategories)[0];
-        state.currentRound.isCustomCategory = !!getCustomLists().find(l => l.category === selectedCategoryName);
-        state.currentRound.word = wordPool[Math.floor(Math.random() * wordPool.length)];
+        const selectedCategories = Array.from(state.gameSettings.selectedCategories);
+        state.currentRound.category = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
+        const wordsOfCategory = getAllWordLists()[state.currentRound.category];
+        state.currentRound.word = wordsOfCategory[Math.floor(Math.random() * wordsOfCategory.length)];
+        
+        state.currentRound.isCustomCategory = !!getCustomLists().find(l => l.category === state.currentRound.category);
         state.currentRound.startingPlayer = state.players[Math.floor(Math.random() * state.players.length)];
         
         if (state.gameSettings.useRoundEvents && Math.random() < 0.25) { // 25% chance
@@ -271,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
      * Muestra la pantalla de revelación sin votación.
      */
     function revealRolesWithoutVoting() {
-        // Actualiza la estadística de partidas jugadas para todos en la ronda
         state.players.forEach(p => {
             const player = getPlayerByName(p.name);
             if (player) {
@@ -279,8 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         saveMasterPlayerList();
-
-        // Muestra la pantalla de revelación
         showRevealScreen();
     }
 
@@ -289,13 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
         revealWord.textContent = state.currentRound.word;
         const impostors = state.currentRound.assignments.filter(a => a.role === ROLES.IMPOSTOR);
         revealImpostorsList.innerHTML = impostors.map(a => `<li>${a.player.name}</li>`).join('');
-        // Aquí iría la lógica para mostrar otros roles si se quisiera
         showScreen('reveal');
     }
     
     // --- Lógica de Logros ---
     // La lógica de logros permanece, pero no se activará sin un ganador/perdedor.
-    // Esto es intencional según el nuevo flujo de juego sin votación.
     function checkAndUnlockAchievements(player, isWinner, role) {
         const context = {
             votesAgainst: state.currentRound.eliminatedPlayer === player.name ? 1 : 0,
@@ -422,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     startGameBtn.addEventListener('click', startGame);
     
-    // CORRECCIÓN: El botón de acusación ahora revela los roles directamente
     accusationBtn.addEventListener('click', revealRolesWithoutVoting);
 
     nextPlayerBtn.addEventListener('click', () => {
@@ -433,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
             nextPlayerBtn.classList.add('hidden');
             setTimeout(displayCurrentPlayerRole, 400);
         } else {
-            showScreen('inGame');
+            showScreen('in-game');
         }
     });
     roleCard.addEventListener('click', () => {
@@ -454,7 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
             saveCustomLists(lists);
             newListNameInput.value = '';
             newListWordsTextarea.value = '';
-            // Aquí se podría renderizar la lista de listas personalizadas
         }
     });
     
@@ -522,10 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('setup');
     });
 
-    // CORRECCIÓN: El botón "Nuevo Juego" ahora mantiene a los jugadores
     newGameBtn.addEventListener('click', () => {
         resetCurrentRound();
-        // state.players = []; // Esta línea se ha eliminado para mantener a los jugadores
         renderPlayers();
         showScreen('setup');
     });
