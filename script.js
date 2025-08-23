@@ -411,11 +411,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!preset) return;
         impostorCountSelect.value = preset.impostorCount;
         document.querySelectorAll('.game-mode-cb').forEach(cb => {
-            const mode = cb.id.replace('-mode', '');
-            cb.checked = preset[mode];
+            const modeKey = 'use' + cb.id.charAt(0).toUpperCase() + cb.id.slice(1).replace('-mode', '');
+            cb.checked = !!preset[modeKey];
         });
-        // Actualizar estado
-        Object.assign(state.gameSettings, preset);
+        updateGameSettingsFromUI();
     }
 
     // --- Renderizado de Modales ---
@@ -435,9 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function renderAchievementsModal() {
         const achievementsList = document.getElementById('achievements-list');
-        const playerAchievements = masterPlayerList.flatMap(p => p.achievements);
+        const allPlayerAchievements = new Set(masterPlayerList.flatMap(p => p.achievements));
         achievementsList.innerHTML = Object.entries(achievements).map(([key, ach]) => {
-            const unlocked = playerAchievements.includes(key);
+            const unlocked = allPlayerAchievements.has(key);
             return `<div class="p-2 ${unlocked ? 'opacity-100' : 'opacity-40'}">
                         <h4 class="font-bold text-[var(--text-light)]">${unlocked ? '🏆' : '🔒'} ${ach.name}</h4>
                         <p class="text-sm text-[var(--text-dark)]">${ach.description}</p>
@@ -473,9 +472,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addPlayerBtn.addEventListener('click', () => addPlayerToGame(playerNameInput.value));
     playerNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addPlayerToGame(playerNameInput.value); });
     playersList.addEventListener('click', (e) => {
-        if (e.target.classList.contains('remove-player-btn')) {
+        const removeBtn = e.target.closest('.remove-player-btn');
+        if (removeBtn) {
             soundManager.playRemove();
-            state.players.splice(e.target.dataset.index, 1);
+            state.players.splice(removeBtn.dataset.index, 1);
             renderPlayers();
         }
     });
@@ -487,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     nextPlayerBtn.addEventListener('click', () => {
+        soundManager.playClick();
         state.currentRound.currentPlayerIndex++;
         if (state.currentRound.currentPlayerIndex < state.currentRound.assignments.length) {
             roleCard.classList.remove('is-flipped');
@@ -520,10 +521,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     savePresetBtn.addEventListener('click', () => {
         const name = prompt("Nombre para este preset:");
-        if (!name) return;
-        const preset = { name, impostorCount: impostorCountSelect.value };
+        if (!name || !name.trim()) return;
+        const preset = { name: name.trim(), impostorCount: impostorCountSelect.value };
         document.querySelectorAll('.game-mode-cb').forEach(cb => {
-            preset[cb.id.replace('-mode', '')] = cb.checked;
+            const modeKey = 'use' + cb.id.charAt(0).toUpperCase() + cb.id.slice(1).replace('-mode', '');
+            preset[modeKey] = cb.checked;
         });
         const presets = getPresets();
         presets.push(preset);
@@ -564,11 +566,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    document.querySelectorAll('.game-mode-cb').forEach(cb => {
-        cb.addEventListener('change', () => {
+    function updateGameSettingsFromUI() {
+        state.gameSettings.impostorCount = parseInt(impostorCountSelect.value, 10);
+        document.querySelectorAll('.game-mode-cb').forEach(cb => {
             const settingName = 'use' + cb.id.charAt(0).toUpperCase() + cb.id.slice(1).replace('-mode', '');
             state.gameSettings[settingName] = cb.checked;
         });
+    }
+
+    document.querySelectorAll('.game-mode-cb, #impostor-count').forEach(el => {
+        el.addEventListener('change', updateGameSettingsFromUI);
     });
 
     playAgainBtn.addEventListener('click', () => {
@@ -582,6 +589,46 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPlayers();
         showScreen('setup');
     });
+    
+    // Función para seleccionar jugadores ponderados
+    function selectWeightedPlayers(players, count) {
+        const selectedPlayers = [];
+        let selectionPool = players.map(p => {
+            const masterP = getPlayerByName(p.name);
+            // Si el jugador no se encuentra por alguna razón, se le da peso normal.
+            const wasImpostor = masterP ? masterP.wasImpostor : false;
+            return { player: p, weight: wasImpostor ? 1 : 3 };
+        });
+
+        for (let i = 0; i < count && selectionPool.length > 0; i++) {
+            const totalWeight = selectionPool.reduce((sum, p) => sum + p.weight, 0);
+            if (totalWeight === 0) break;
+
+            let randomTarget = Math.random() * totalWeight;
+            let selectedIndex = -1;
+
+            for (let j = 0; j < selectionPool.length; j++) {
+                randomTarget -= selectionPool[j].weight;
+                if (randomTarget < 0) {
+                    selectedIndex = j;
+                    break;
+                }
+            }
+            
+            if (selectedIndex !== -1) {
+                selectedPlayers.push(selectionPool[selectedIndex].player);
+                selectionPool.splice(selectedIndex, 1);
+            }
+        }
+        
+        // Actualizar `wasImpostor` para la siguiente ronda
+        masterPlayerList.forEach(mp => {
+            mp.wasImpostor = selectedPlayers.some(sp => sp.name === mp.name);
+        });
+        saveMasterPlayerList();
+
+        return selectedPlayers;
+    }
     
     init();
 });
