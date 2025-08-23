@@ -3,796 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imposter Who? - El Juego de Palabras</title>
+    <title>Imposter Who?</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a202c">
     <style>
-        :root {
-            --bg-primary: #111827; --bg-secondary: #1f2937; --bg-tertiary: #374151;
-            --text-primary: #f9fafb; --text-secondary: #d1d5db;
-            --accent-primary: #06b6d4; --accent-secondary: #8b5cf6; --accent-danger: #ef4444;
-        }
-        .theme-space {
-            --bg-primary: #0c1445; --bg-secondary: #1f2b7a; --bg-tertiary: #3d4ed8;
-            --text-primary: #e0e7ff; --text-secondary: #c7d2fe;
-            --accent-primary: #7df9ff; --accent-secondary: #f0f; --accent-danger: #ff5555;
-        }
-        .theme-fantasy {
-            --bg-primary: #4a2c2a; --bg-secondary: #7b4841; --bg-tertiary: #a06b5e;
-            --text-primary: #f5eadd; --text-secondary: #e4d5c7;
-            --accent-primary: #fcd34d; --accent-secondary: #b45309; --accent-danger: #dc2626;
-        }
-        .theme-noir {
-            --bg-primary: #171717; --bg-secondary: #262626; --bg-tertiary: #404040;
-            --text-primary: #e5e5e5; --text-secondary: #a3a3a3;
-            --accent-primary: #dc2626; --accent-secondary: #a3a3a3; --accent-danger: #dc2626;
-        }
         body {
             font-family: 'Inter', sans-serif;
-            touch-action: manipulation;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
         }
-        .screen { min-height: 100vh; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; box-sizing: border-box; transition: opacity 0.5s, transform 0.5s; }
-        .screen.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; position: absolute; top: 0; left: 0; }
-        .card { transform-style: preserve-3d; transition: transform 0.6s; }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-        .card-face-back { transform: rotateY(180deg); }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .color-swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s; }
-        .color-swatch.selected { border-color: white; transform: scale(1.2); }
-        .player-added-animation { animation: player-added 0.5s ease-out forwards; }
-        @keyframes player-added { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        #confetti-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
-        .bg-primary { background-color: var(--bg-primary); } .bg-secondary { background-color: var(--bg-secondary); } .bg-tertiary { background-color: var(--bg-tertiary); }
-        .text-primary { color: var(--text-primary); } .text-secondary { color: var(--text-secondary); }
-        .accent-primary { color: var(--accent-primary); } .bg-accent-primary { background-color: var(--bg-accent-primary); }
-        .border-accent-primary { border-color: var(--accent-primary); }
-        .accent-secondary { color: var(--accent-secondary); } .bg-accent-secondary { background-color: var(--accent-secondary); }
-        .accent-danger { color: var(--accent-danger); } .bg-accent-danger { background-color: var(--accent-danger); }
+        .scene {
+            perspective: 1000px;
+        }
+        .card {
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card__face {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .card__face--back {
+            transform: rotateY(180deg);
+        }
+        /* Estilos para checkboxes personalizados */
+        .custom-checkbox:checked {
+            background-color: #4a5568;
+            border-color: #4a5568;
+        }
+        .custom-checkbox:checked::after {
+            content: '✔';
+            color: white;
+            display: block;
+            text-align: center;
+            line-height: 1.25rem;
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
 
-    <!-- Pantalla de Configuración (Setup) -->
-    <div id="setup-screen" class="screen">
-        <div class="w-full max-w-md text-center">
-            <div class="flex items-center justify-center mb-4">
-                <h1 class="text-4xl sm:text-5xl font-bold accent-primary">Imposter Who?</h1>
-                <button id="mute-btn" class="ml-4 p-2 bg-tertiary rounded-full hover:opacity-80 transition-opacity">
-                    <svg id="music-on-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                    <svg id="music-off-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="1" x2="1" y2="23"></line><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                </button>
+    <div id="app" class="w-full max-w-md mx-auto">
+
+        <!-- Pantalla 1: Configuración de la Partida -->
+        <div id="setup-screen" class="space-y-6">
+            <h1 class="text-4xl font-bold text-center text-gray-300">Imposter Who?</h1>
+            
+            <!-- Gestión de Jugadores -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-3">Jugadores</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="player-name-input" class="w-full bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Nombre del jugador...">
+                    <button id="add-player-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors">Añadir</button>
+                </div>
+                <ul id="players-list" class="mt-3 space-y-2">
+                    <!-- Jugadores añadidos dinámicamente -->
+                </ul>
             </div>
-            <p class="text-lg text-secondary mb-8">Configura la partida para jugar en la vida real.</p>
 
-            <div class="bg-secondary p-4 sm:p-6 rounded-2xl shadow-lg">
-                <div class="mb-4">
-                    <div class="flex">
-                        <input type="text" id="player-name-input" class="flex-grow bg-tertiary text-primary border-2 border-gray-600 rounded-l-lg p-3 focus:outline-none focus:border-accent-primary" placeholder="Nombre del jugador...">
-                        <button id="add-player-btn" class="bg-accent-primary hover:opacity-90 text-black font-bold py-3 px-5 rounded-r-lg transition-colors">Añadir</button>
-                    </div>
-                    <div id="color-picker" class="flex justify-center space-x-2 mt-3"></div>
-                </div>
-
-                <div id="players-list" class="mb-4 text-left h-32 overflow-y-auto bg-tertiary p-3 rounded-lg"></div>
-
-                <div class="grid grid-cols-2 gap-4 mb-6 text-left">
-                    <div>
-                        <label for="impostor-count" class="block mb-2 text-sm font-medium text-secondary">Nº de Impostores</label>
-                        <select id="impostor-count" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary"></select>
-                    </div>
-                    <div>
-                        <label for="theme-select" class="block mb-2 text-sm font-medium text-secondary">Tema Visual</label>
-                        <select id="theme-select" class="w-full bg-tertiary border-2 border-gray-600 rounded-lg p-2 focus:outline-none focus:border-accent-primary">
-                            <option value="default">Oscuro (Default)</option>
-                            <option value="space">Espacial</option>
-                            <option value="fantasy">Fantasía</option>
-                            <option value="noir">Noir</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="mb-4 text-left">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="text-sm font-medium text-secondary">Categorías</label>
-                        <div>
-                             <button id="surprise-category-btn" class="text-xs bg-accent-secondary hover:opacity-90 text-white px-2 py-1 rounded mr-2">✨ Sorpréndeme</button>
-                             <button id="select-all-categories-btn" class="text-xs bg-tertiary hover:opacity-90 px-2 py-1 rounded">Seleccionar Todas</button>
-                        </div>
-                    </div>
-                    <div id="category-checkboxes" class="grid grid-cols-2 gap-2 bg-tertiary p-3 rounded-lg max-h-80 overflow-y-auto"></div>
-                </div>
-                
-                <div class="text-left space-y-3 border-t border-gray-700 pt-4">
-                    <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="troll-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">Modo Troll</span></label>
-                    <label class="flex items-center space-x-3 cursor-pointer"><input type="checkbox" id="detective-mode-checkbox" class="form-checkbox h-5 w-5 bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary"><span class="text-secondary">🕵️ Modo Detective</span></label>
-                </div>
-
-                <button id="start-game-btn" class="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed">Asignar Roles</button>
-                <button id="stats-btn" class="w-full mt-3 bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-4 rounded-lg transition-colors">Ver Estadísticas</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pantalla de Asignación de Roles -->
-    <div id="role-assignment-screen" class="screen hidden">
-        <div class="w-full max-w-md text-center">
-            <h2 class="text-3xl font-bold mb-4">Turno de <span id="current-player-name-assignment"></span></h2>
-            <p class="text-lg text-secondary mb-8">Pulsa para ver tu rol. ¡Que nadie más mire!</p>
-            <div id="role-card" class="card w-full h-80 sm:h-96 perspective-1000">
-                <div class="card-face absolute w-full h-full flex justify-center items-center bg-accent-primary rounded-2xl shadow-lg">
-                    <p class="text-2xl font-bold text-black">TOCA PARA REVELAR</p>
-                </div>
-                <div class="card-face card-face-back absolute w-full h-full flex flex-col justify-center bg-secondary rounded-2xl shadow-lg p-6">
-                    <div>
-                        <p class="text-sm accent-primary mb-2">Categoría: <span id="role-category"></span></p>
-                        <h3 id="role-title" class="text-3xl sm:text-4xl font-bold mb-4"></h3>
-                        <div id="role-word" class="text-2xl"></div>
-                    </div>
+            <!-- Opciones de Partida -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-3">Opciones</h2>
+                <div class="flex items-center justify-between">
+                    <label for="impostor-count" class="text-gray-300">Número de Impostores:</label>
+                    <select id="impostor-count" class="bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2">
+                        <option value="1">1</option>
+                        <option value="2" disabled>2</option>
+                    </select>
                 </div>
             </div>
-            <button id="next-player-btn" class="mt-8 w-full bg-tertiary hover:opacity-90 text-primary font-bold py-4 px-4 rounded-lg text-xl transition-colors hidden">Siguiente Jugador / Empezar</button>
-        </div>
-    </div>
 
-    <!-- Pantalla de Juego en Curso -->
-    <div id="in-game-screen" class="screen hidden">
-        <div class="w-full max-w-md text-center">
-            <h2 class="text-4xl font-bold accent-primary mb-6">Partida en Curso</h2>
-            <div class="bg-secondary p-4 sm:p-8 rounded-2xl shadow-lg">
-                 <p id="starting-player-text" class="text-xl text-secondary mb-6"></p>
-                 <button id="reveal-impostor-btn" class="w-full bg-accent-danger hover:opacity-90 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors mb-4">Revelar Roles</button>
-                 <button id="new-game-btn-ingame" class="w-full bg-tertiary hover:opacity-90 text-primary font-bold py-3 px-4 rounded-lg transition-colors">Nuevo Juego</button>
+            <!-- Selección de Categorías -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-semibold">Categorías</h2>
+                    <button id="toggle-categories-btn" class="text-sm text-blue-400 hover:underline">Seleccionar Todas</button>
+                </div>
+                <div id="categories-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+                    <!-- Categorías añadidas dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Modos de Juego Especiales -->
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-3">Modos Especiales</h2>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="impostor-hint-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                        <span>Pista para el Impostor (si empieza)</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="troll-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                        <span>Modo Troll (15% todos impostores)</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="saboteur-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                        <span>Modo Saboteador</span>
+                    </label>
+                     <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="detective-mode" class="appearance-none w-5 h-5 bg-gray-700 rounded-sm border border-gray-600 custom-checkbox">
+                        <span>Modo Detective</span>
+                    </label>
+                </div>
+            </div>
+
+            <button id="start-game-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">Asignar Roles</button>
+        </div>
+
+        <!-- Pantalla 2: Asignación de Roles -->
+        <div id="role-assignment-screen" class="hidden text-center space-y-6">
+            <h2 class="text-2xl font-bold">Es el turno de <span id="current-player-name" class="text-yellow-400"></span></h2>
+            <p class="text-gray-400">Pasa el dispositivo. Haz clic en la tarjeta para ver tu rol y palabra secreta.</p>
+            <div class="scene w-full h-64">
+                <div id="role-card" class="card w-full h-full cursor-pointer">
+                    <div class="card__face card__face--front absolute w-full h-full bg-gray-700 rounded-lg flex items-center justify-center">
+                        <span class="text-2xl font-bold">Haz Clic para Revelar</span>
+                    </div>
+                    <div id="role-card-back" class="card__face card__face--back absolute w-full h-full bg-gray-800 rounded-lg p-6 flex flex-col items-center justify-center space-y-4">
+                        <h3 id="role-title" class="text-3xl font-bold"></h3>
+                        <p id="role-description" class="text-lg"></p>
+                        <button id="hint-button" class="hidden bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-2 px-4 rounded-md transition-colors">Pedir Pista</button>
+                    </div>
+                </div>
+            </div>
+            <button id="next-player-btn" class="hidden w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Siguiente Jugador</button>
+        </div>
+
+        <!-- Pantalla 3: Partida en Curso -->
+        <div id="in-game-screen" class="hidden text-center space-y-8">
+            <h2 class="text-3xl font-bold text-gray-300">¡La partida ha comenzado!</h2>
+            <p class="text-xl">Empieza la discusión: <span id="starting-player-name" class="text-green-400 font-semibold"></span></p>
+            <div class="space-y-4">
+                <button id="reveal-roles-btn" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Revelar Roles</button>
+                <button id="new-game-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Nuevo Juego</button>
             </div>
         </div>
-    </div>
-    
-    <!-- Pantalla de Revelación -->
-    <div id="reveal-screen" class="screen hidden">
-        <canvas id="confetti-canvas"></canvas>
-        <div class="w-full max-w-md text-center bg-secondary p-4 sm:p-8 rounded-2xl shadow-lg z-10">
-            <h2 class="text-3xl font-bold mb-4">El juego ha terminado</h2>
-            <div id="reveal-info" class="space-y-3"></div>
-            <button id="new-game-btn-reveal" class="mt-8 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-4 rounded-lg text-xl transition-colors">Jugar de Nuevo</button>
+
+        <!-- Pantalla 4: Revelación Final -->
+        <div id="reveal-screen" class="hidden text-center space-y-6 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-3xl font-bold text-gray-300">Resultados Finales</h2>
+            <div class="text-left space-y-3">
+                <p class="text-lg">La palabra era: <strong id="reveal-word" class="text-yellow-400"></strong></p>
+                <div id="reveal-impostors-container">
+                    <p class="text-lg">Impostor(es):</p>
+                    <ul id="reveal-impostors-list" class="list-disc list-inside text-red-400">
+                        <!-- Lista de impostores -->
+                    </ul>
+                </div>
+                <div id="reveal-saboteur-container" class="hidden">
+                    <p class="text-lg">Saboteador: <strong id="reveal-saboteur" class="text-orange-400"></strong></p>
+                </div>
+                <div id="reveal-detective-container" class="hidden">
+                    <p class="text-lg">Detective: <strong id="reveal-detective" class="text-blue-400"></strong></p>
+                </div>
+            </div>
+            <button id="play-again-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-md transition-colors">Jugar de Nuevo</button>
         </div>
     </div>
 
-    <!-- Modals -->
-    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-secondary rounded-2xl p-6 max-w-sm text-center shadow-lg">
-            <h3 class="text-2xl font-bold accent-danger mb-4">Error</h3>
-            <p id="error-message" class="text-secondary mb-6"></p>
-            <button id="close-error-modal-btn" class="bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
-        </div>
-    </div>
-    <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-secondary rounded-2xl p-6 max-w-lg w-full text-center shadow-lg">
-            <h3 class="text-3xl font-bold accent-primary mb-6">Estadísticas de Jugadores</h3>
-            <div id="stats-container" class="max-h-80 overflow-y-auto text-left"></div>
-            <button id="close-stats-modal-btn" class="mt-6 bg-tertiary hover:opacity-90 text-primary font-bold py-2 px-6 rounded-lg">Cerrar</button>
-        </div>
-    </div>
-    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-secondary rounded-2xl p-8 text-center shadow-lg flex flex-col items-center">
-            <div class="loader mb-4"></div>
-            <p id="loading-message" class="text-secondary">Asignando roles...</p>
-        </div>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- CONSTANTES Y ESTADO DEL JUEGO ---
-            const LOCAL_WORD_CATEGORIES = {
-                "Animales": ["Perro", "Gato", "Elefante", "León", "Jirafa", "Tiburón", "Águila", "Serpiente", "Oso", "Lobo"],
-                "Comida": ["Pizza", "Hamburguesa", "Sushi", "Paella", "Taco", "Ensalada", "Pasta", "Helado", "Sopa", "Chocolate"],
-                "Profesiones": ["Médico", "Profesor", "Bombero", "Policía", "Cocinero", "Ingeniero", "Artista", "Astronauta", "Abogado", "Periodista"],
-                "Deportes": ["Fútbol", "Baloncesto", "Tenis", "Natación", "Béisbol", "Golf", "Boxeo", "Ciclismo", "Atletismo", "Rugby"],
-                "Películas Famosas": ["Titanic", "Star Wars", "El Padrino", "Jurassic Park", "Avatar", "Matrix", "El Señor de los Anillos", "Harry Potter", "Frozen", "Joker"],
-                "Países": ["España", "México", "Japón", "Egipto", "Brasil", "Canadá", "Australia", "Italia", "China", "Rusia"],
-                "Objetos de Casa": ["Silla", "Mesa", "Lámpara", "Sofá", "Cama", "Televisión", "Espejo", "Reloj", "Tenedor", "Ventana"],
-                "Instrumentos Musicales": ["Guitarra", "Piano", "Violín", "Batería", "Trompeta", "Flauta", "Saxofón", "Arpa", "Bajo", "Acordeón"],
-                "Superhéroes": ["Superman", "Batman", "Spiderman", "Iron Man", "Capitán América", "Thor", "Hulk", "Wonder Woman", "Aquaman", "Flash"],
-                "Videojuegos": ["Mario Bros", "Zelda", "Minecraft", "Fortnite", "Among Us", "Pac-Man", "Tetris", "Pokémon", "Sonic", "Grand Theft Auto"]
-            };
-            const PLAYER_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#ec4899'];
-            const TROLL_MODE_PROBABILITY = 0.15;
-            
-            let playerStats = {};
-            let players = [];
-            let gameRoles = { impostors: [], detective: null, civilians: [] };
-            let secretWord = '', selectedCategoryText = '';
-            let isTrollModeActive = false;
-            let selectedColor = PLAYER_COLORS[0];
-            let currentPlayerIndex = 0;
-            let currentTheme = 'default';
-            let isMuted = true;
-            let usedWords = {}; // Objeto para rastrear palabras usadas por categoría
-
-            // --- ELEMENTOS DEL DOM ---
-            const screens = { setup: document.getElementById('setup-screen'), roleAssignment: document.getElementById('role-assignment-screen'), inGame: document.getElementById('in-game-screen'), reveal: document.getElementById('reveal-screen') };
-            const playerNameInput = document.getElementById('player-name-input');
-            const addPlayerBtn = document.getElementById('add-player-btn');
-            const playersList = document.getElementById('players-list');
-            const impostorCountSelect = document.getElementById('impostor-count');
-            const categoryCheckboxes = document.getElementById('category-checkboxes');
-            const selectAllCategoriesBtn = document.getElementById('select-all-categories-btn');
-            const startGameBtn = document.getElementById('start-game-btn');
-            const surpriseCategoryBtn = document.getElementById('surprise-category-btn');
-            const trollModeCheckbox = document.getElementById('troll-mode-checkbox');
-            const detectiveModeCheckbox = document.getElementById('detective-mode-checkbox');
-            const colorPicker = document.getElementById('color-picker');
-            const statsBtn = document.getElementById('stats-btn');
-            const themeSelect = document.getElementById('theme-select');
-            const muteBtn = document.getElementById('mute-btn');
-            const musicOnIcon = document.getElementById('music-on-icon');
-            const musicOffIcon = document.getElementById('music-off-icon');
-            const errorModal = document.getElementById('error-modal');
-            const errorMessage = document.getElementById('error-message');
-            const closeErrorModalBtn = document.getElementById('close-error-modal-btn');
-            const statsModal = document.getElementById('stats-modal');
-            const statsContainer = document.getElementById('stats-container');
-            const closeStatsModalBtn = document.getElementById('close-stats-modal-btn');
-            const loadingModal = document.getElementById('loading-modal');
-            const loadingMessage = document.getElementById('loading-message');
-            const currentPlayerNameAssignment = document.getElementById('current-player-name-assignment');
-            const roleCard = document.getElementById('role-card');
-            const roleCategory = document.getElementById('role-category');
-            const roleTitle = document.getElementById('role-title');
-            const roleWord = document.getElementById('role-word');
-            const nextPlayerBtn = document.getElementById('next-player-btn');
-            const startingPlayerText = document.getElementById('starting-player-text');
-            const revealImpostorBtn = document.getElementById('reveal-impostor-btn');
-            const newGameBtnIngame = document.getElementById('new-game-btn-ingame');
-            const revealInfo = document.getElementById('reveal-info');
-            const newGameBtnReveal = document.getElementById('new-game-btn-reveal');
-            const confettiCanvas = document.getElementById('confetti-canvas');
-
-            // --- AUDIO & MUSIC ---
-            let sounds = {};
-            let music = {};
-            let currentLoop;
-
-            function setupAudio() {
-                if (Tone.context.state !== 'running') { Tone.start(); }
-                if (Object.keys(sounds).length > 0) return;
-
-                sounds.default = {
-                    flip: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 0.1 } }).toDestination(),
-                    reveal: new Tone.MembraneSynth().toDestination()
-                };
-                sounds.space = {
-                    flip: new Tone.Synth({ oscillator: { type: 'sawtooth' }, filter: { type: 'lowpass', frequency: 4000 }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.1 } }).toDestination(),
-                    reveal: new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0 } }).toDestination()
-                };
-                sounds.fantasy = {
-                    flip: new Tone.PluckSynth().toDestination(),
-                    reveal: new Tone.MetalSynth({ frequency: 150, envelope: { attack: 0.001, decay: 0.4, release: 0.2 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).toDestination()
-                };
-                sounds.noir = {
-                    flip: new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.01, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination(),
-                    reveal: new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 0.2 } }).toDestination()
-                };
-                
-                const createMusic = (synth, notes) => new Tone.Loop(time => { synth.triggerAttackRelease(notes[Math.floor(Math.random() * notes.length)], "2n", time); }, "1m");
-                music.default = createMusic(new Tone.Synth({ oscillator: { type: 'fmsine' }, envelope: { attack: 0.2, decay: 0.5, sustain: 0.1, release: 1 } }).toDestination(), ['C3', 'E3', 'G3']);
-                music.space = createMusic(new Tone.AMSynth({ harmonicity: 1.5, envelope: { attack: 0.1, decay: 1, sustain: 0.1, release: 1 } }).toDestination(), ['A2', 'C3', 'E3']);
-                music.fantasy = createMusic(new Tone.PluckSynth({ resonance: 0.9 }).toDestination(), ['G4', 'A4', 'C5', 'D5']);
-                music.noir = createMusic(new Tone.Synth({ oscillator: { type: 'triangle8' }, envelope: { attack: 0.5, decay: 0.5, sustain: 0.2, release: 1 } }).toDestination(), ['A#2', 'D3', 'F3']);
-                
-                Tone.Transport.start();
-            }
-            function playFlipSound() {
-                if (isMuted) return;
-                if (!sounds.default) setupAudio();
-                const sound = sounds[currentTheme] || sounds.default;
-                if (currentTheme === 'space') sound.flip.triggerAttackRelease('C4', '8n');
-                else if (currentTheme === 'fantasy') sound.flip.triggerAttackRelease('G5', '8n', Tone.now());
-                else sound.flip.triggerAttackRelease('C5', '8n', Tone.now());
-            }
-            function playRevealSound() {
-                if (isMuted) return;
-                if (!sounds.default) setupAudio();
-                const sound = sounds[currentTheme] || sounds.default;
-                if (currentTheme === 'noir') sound.reveal.triggerAttackRelease('A#2', '2n');
-                else if (currentTheme === 'fantasy') sound.reveal.triggerAttackRelease('C3', '2n');
-                else if (currentTheme === 'space') sound.reveal.triggerAttackRelease('2n');
-                else {
-                    sound.reveal.triggerAttackRelease('C2', '8n', Tone.now());
-                    sound.reveal.triggerAttackRelease('G2', '8n', Tone.now() + 0.1);
-                }
-            }
-            function playMusic(theme) {
-                setupAudio();
-                if (currentLoop) currentLoop.stop();
-                if (!isMuted) {
-                    currentLoop = music[theme] || music.default;
-                    if (currentLoop) {
-                        currentLoop.start(0);
-                    }
-                }
-            }
-            function toggleMute() {
-                setupAudio();
-                isMuted = !isMuted;
-                if (isMuted) {
-                    if (currentLoop) currentLoop.stop();
-                } else {
-                    playMusic(currentTheme);
-                }
-                musicOnIcon.classList.toggle('hidden', isMuted);
-                musicOffIcon.classList.toggle('hidden', !isMuted);
-            }
-
-            // --- THEME MANAGEMENT ---
-            function applyTheme(theme) {
-                document.body.className = `bg-primary text-primary theme-${theme}`;
-                currentTheme = theme;
-                localStorage.setItem('imposterTheme', theme);
-                playMusic(theme);
-            }
-
-            // --- LÓGICA DE LA APLICACIÓN ---
-            function showScreen(screenName) {
-                Object.values(screens).forEach(screen => screen.classList.add('hidden'));
-                screens[screenName].classList.remove('hidden');
-                if (screenName === 'setup' || screenName === 'roleAssignment') {
-                    playMusic(currentTheme);
-                } else {
-                    if (currentLoop) currentLoop.stop();
-                }
-            }
-
-            function showModal(modal, message = '') {
-                if (message) {
-                    if(modal === errorModal) errorMessage.textContent = message;
-                    if(modal === loadingModal) loadingMessage.textContent = message;
-                }
-                modal.classList.remove('hidden');
-            }
-
-            function hideModal(modal) {
-                modal.classList.add('hidden');
-            }
-
-            function showError(message) {
-                showModal(errorModal, message);
-            }
-
-            // Player Management
-            function loadPlayers() {
-                const savedPlayers = localStorage.getItem('imposterPlayers');
-                if (savedPlayers) {
-                    players = JSON.parse(savedPlayers);
-                }
-            }
-
-            function savePlayers() {
-                localStorage.setItem('imposterPlayers', JSON.stringify(players));
-            }
-
-            function populateColorPicker() {
-                colorPicker.innerHTML = '';
-                PLAYER_COLORS.forEach(color => {
-                    const swatch = document.createElement('div');
-                    swatch.className = 'color-swatch';
-                    swatch.style.backgroundColor = color;
-                    if (color === selectedColor) swatch.classList.add('selected');
-                    swatch.addEventListener('click', () => {
-                        selectedColor = color;
-                        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-                        swatch.classList.add('selected');
-                    });
-                    colorPicker.appendChild(swatch);
-                });
-            }
-
-            function addPlayer() {
-                const name = playerNameInput.value.trim();
-                if (name && players.length < 12) {
-                    if(players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-                        showError("Ese nombre ya está en la lista.");
-                        return;
-                    }
-                    players.push({ name, color: selectedColor });
-                    savePlayers();
-                    playerNameInput.value = '';
-                    updatePlayersList(true);
-                    const usedColors = players.map(p => p.color);
-                    const nextColor = PLAYER_COLORS.find(c => !usedColors.includes(c)) || PLAYER_COLORS[0];
-                    selectedColor = nextColor;
-                    document.querySelectorAll('.color-swatch').forEach(s => {
-                        s.classList.toggle('selected', s.style.backgroundColor === selectedColor);
-                    });
-                }
-                playerNameInput.focus();
-            }
-
-            function updateImpostorCountOptions() {
-                const previousValue = impostorCountSelect.value;
-                impostorCountSelect.innerHTML = '';
-
-                if (players.length >= 3) {
-                    const option1 = document.createElement('option');
-                    option1.value = '1';
-                    option1.textContent = '1';
-                    impostorCountSelect.appendChild(option1);
-                }
-                if (players.length >= 5) {
-                    const option2 = document.createElement('option');
-                    option2.value = '2';
-                    option2.textContent = '2';
-                    impostorCountSelect.appendChild(option2);
-                }
-                
-                if (previousValue && impostorCountSelect.querySelector(`option[value="${previousValue}"]`)) {
-                    impostorCountSelect.value = previousValue;
-                }
-            }
-
-            function updatePlayersList(animateLast = false) {
-                playersList.innerHTML = '';
-                if (players.length === 0) {
-                    playersList.innerHTML = '<p class="text-secondary">Añade de 3 a 12 jugadores.</p>';
-                } else {
-                    players.forEach((player, index) => {
-                        const playerElement = document.createElement('div');
-                        playerElement.className = 'flex justify-between items-center bg-tertiary p-2 rounded-md mb-1';
-                        if (animateLast && index === players.length - 1) {
-                            playerElement.classList.add('player-added-animation');
-                        }
-                        playerElement.innerHTML = `
-                            <div class="flex items-center">
-                                <div class="w-5 h-5 rounded-full mr-3" style="background-color: ${player.color};"></div>
-                                <span>${player.name}</span>
-                            </div>
-                            <button class="text-red-500 hover:text-red-400 font-bold" data-index="${index}">X</button>
-                        `;
-                        playersList.appendChild(playerElement);
-                    });
-                }
-                updateImpostorCountOptions();
-                validateGameStart();
-            }
-
-            // Category Management
-            function populateCategories() {
-                categoryCheckboxes.innerHTML = '';
-                Object.keys(LOCAL_WORD_CATEGORIES).forEach(categoryName => {
-                    const categoryId = `category-${categoryName.replace(/\s+/g, '-')}`;
-                    const label = document.createElement('label');
-                    label.className = 'flex items-center space-x-2 text-primary p-2 bg-tertiary rounded-md cursor-pointer hover:opacity-80';
-                    label.innerHTML = `
-                        <input type="checkbox" id="${categoryId}" class="form-checkbox bg-tertiary border-gray-500 text-accent-primary rounded focus:ring-accent-primary" name="category" value="${categoryName}">
-                        <span>${categoryName}</span>
-                    `;
-                    categoryCheckboxes.appendChild(label);
-                    label.querySelector('input').addEventListener('change', validateGameStart);
-                });
-            }
-
-            // Stats Management
-            function loadStats() {
-                const saved = localStorage.getItem('imposterPlayerStats');
-                playerStats = saved ? JSON.parse(saved) : {};
-            }
-
-            function saveStats() {
-                localStorage.setItem('imposterPlayerStats', JSON.stringify(playerStats));
-            }
-
-            function updateStats(winners, losers) {
-                winners.forEach(p => {
-                    if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
-                    playerStats[p.name].wins++;
-                });
-                losers.forEach(p => {
-                    if (!playerStats[p.name]) playerStats[p.name] = { wins: 0, losses: 0 };
-                    playerStats[p.name].losses++;
-                });
-                saveStats();
-            }
-            
-            function showStats() {
-                statsContainer.innerHTML = '';
-                const sortedPlayers = Object.keys(playerStats).sort((a, b) => (playerStats[b].wins - playerStats[b].losses) - (playerStats[a].wins - playerStats[a].losses));
-
-                if (sortedPlayers.length === 0) {
-                    statsContainer.innerHTML = '<p class="text-secondary text-center">No hay estadísticas guardadas. ¡Juega una partida!</p>';
-                } else {
-                     sortedPlayers.forEach(name => {
-                        const stats = playerStats[name];
-                        const winRate = stats.wins + stats.losses > 0 ? Math.round((stats.wins / (stats.wins + stats.losses)) * 100) : 0;
-                        const playerElement = document.createElement('div');
-                        playerElement.className = 'bg-tertiary p-3 rounded-lg mb-2 flex justify-between items-center';
-                        playerElement.innerHTML = `
-                            <div>
-                                <p class="font-bold text-lg">${name}</p>
-                                <p class="text-sm text-secondary">Victorias: ${stats.wins} / Derrotas: ${stats.losses}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold text-xl accent-primary">${winRate}%</p>
-                                <p class="text-xs text-gray-500">Win Rate</p>
-                            </div>
-                        `;
-                        statsContainer.appendChild(playerElement);
-                    });
-                }
-                showModal(statsModal);
-            }
-
-            // Game Logic
-            function validateGameStart() {
-                let minPlayers = 3;
-                if (detectiveModeCheckbox.checked) minPlayers = 4;
-                
-                const selectedCategories = document.querySelectorAll('#category-checkboxes input:checked').length;
-                const canStart = players.length >= minPlayers && selectedCategories > 0;
-                startGameBtn.disabled = !canStart;
-                startGameBtn.title = canStart ? '' : `Se necesitan al menos ${minPlayers} jugadores para este modo.`;
-            }
-            
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-            }
-
-            function startGame() {
-                showModal(loadingModal, 'Preparando la partida...');
-                
-                const selectedCheckboxes = Array.from(document.querySelectorAll('#category-checkboxes input:checked'));
-                const selectedCategories = selectedCheckboxes.map(cb => cb.value);
-                
-                selectedCategoryText = selectedCategories[Math.floor(Math.random() * selectedCategories.length)];
-                
-                let wordPool = LOCAL_WORD_CATEGORIES[selectedCategoryText];
-                if (!usedWords[selectedCategoryText]) {
-                    usedWords[selectedCategoryText] = [];
-                }
-                let availableWords = wordPool.filter(w => !usedWords[selectedCategoryText].includes(w));
-
-                if (availableWords.length === 0) {
-                    usedWords[selectedCategoryText] = [];
-                    availableWords = wordPool;
-                }
-                
-                secretWord = availableWords[Math.floor(Math.random() * availableWords.length)];
-                usedWords[selectedCategoryText].push(secretWord);
-
-                isTrollModeActive = trollModeCheckbox.checked && Math.random() < TROLL_MODE_PROBABILITY;
-                
-                const impostorCount = parseInt(impostorCountSelect.value);
-                const useDetective = detectiveModeCheckbox.checked;
-
-                if (impostorCount + (useDetective ? 1 : 0) >= players.length) {
-                    hideModal(loadingModal);
-                    showError("Debe haber al menos un civil que no sea el detective.");
-                    return;
-                }
-
-                let playersToAssign = [...players];
-                shuffleArray(playersToAssign);
-                gameRoles = { impostors: [], detective: null, civilians: [] };
-
-                if (isTrollModeActive) {
-                    gameRoles.impostors = players.map(p => p.name);
-                } else {
-                    for (let i = 0; i < impostorCount; i++) {
-                        gameRoles.impostors.push(playersToAssign.pop().name);
-                    }
-                    if (useDetective) {
-                        gameRoles.detective = playersToAssign.pop().name;
-                    }
-                    gameRoles.civilians = playersToAssign.map(p => p.name);
-                }
-                
-                setTimeout(() => {
-                    hideModal(loadingModal);
-                    currentPlayerIndex = 0;
-                    showScreen('roleAssignment');
-                    displayRoleForCurrentPlayer();
-                }, 500);
-            }
-            
-            function updateRoleCardContent() {
-                const player = players[currentPlayerIndex];
-                currentPlayerNameAssignment.textContent = player.name;
-                roleCategory.textContent = selectedCategoryText;
-
-                let title = '', text = '';
-                if (isTrollModeActive) {
-                    title = '🤫 ¡Eres IMPOSTOR!';
-                    text = 'Descubre la palabra secreta.';
-                } else if (gameRoles.impostors.includes(player.name)) {
-                    title = '🤫 ¡Eres IMPOSTOR!';
-                    text = 'Descubre la palabra secreta.';
-                } else if (gameRoles.detective === player.name) {
-                    title = '🕵️ ¡Eres DETECTIVE!';
-                    text = `La palabra es: "${secretWord}". ¡Acusa sabiamente!`;
-                } else {
-                    title = '👤 Eres un CIVIL';
-                    text = `La palabra es: "${secretWord}"`;
-                }
-                roleTitle.textContent = title;
-                roleWord.innerHTML = text;
-            }
-
-            function displayRoleForCurrentPlayer() {
-                roleCard.classList.remove('is-flipped');
-                nextPlayerBtn.classList.add('hidden');
-                updateRoleCardContent();
-            }
-            
-            function nextPlayer() {
-                currentPlayerIndex++;
-                if (currentPlayerIndex < players.length) {
-                    roleCard.classList.remove('is-flipped');
-                    nextPlayerBtn.classList.add('hidden');
-                    setTimeout(() => {
-                        updateRoleCardContent();
-                    }, 600);
-                } else {
-                    const potentialStarters = players.filter(p => !gameRoles.impostors.includes(p.name));
-                    
-                    if (isTrollModeActive || potentialStarters.length === 0) {
-                        const randomPlayer = players[Math.floor(Math.random() * players.length)];
-                        startingPlayerText.innerHTML = `¡Ronda de locos! Empieza <span class="font-bold accent-primary">${randomPlayer.name}</span>.`;
-                    } else {
-                        const startingPlayer = potentialStarters[Math.floor(Math.random() * potentialStarters.length)];
-                        startingPlayerText.innerHTML = `Empieza <span class="font-bold accent-primary">${startingPlayer.name}</span>.`;
-                    }
-                    
-                    showScreen('inGame');
-                }
-            }
-
-            function revealRoles() {
-                playRevealSound();
-                let winners, losers;
-                if (!isTrollModeActive) {
-                    losers = players.filter(p => gameRoles.impostors.includes(p.name));
-                    winners = players.filter(p => !gameRoles.impostors.includes(p.name));
-                    updateStats(winners, losers);
-                    triggerConfetti(winners.map(p => p.color));
-                }
-
-                let html = '';
-                if (isTrollModeActive) {
-                    html += `<h3 class="text-4xl font-bold accent-danger mb-4">¡RONDA TROLL!</h3><p class="text-lg text-secondary">¡Todos erais impostores! La palabra "secreta" era <span class="font-bold accent-primary">${secretWord}</span>.</p>`;
-                } else {
-                    const impostorText = gameRoles.impostors.length > 1 ? 'Los impostores eran' : 'El impostor era';
-                    html += `<p class="text-lg text-secondary">${impostorText}: <span class="font-bold accent-danger">${gameRoles.impostors.join(', ')}</span></p>`;
-                    if(gameRoles.detective) {
-                        html += `<p class="text-lg text-secondary">El detective era: <span class="font-bold text-blue-400">${gameRoles.detective}</span></p>`;
-                    }
-                    html += `<p class="text-lg text-secondary">La palabra secreta era: <span class="font-bold accent-primary">${secretWord}</span></p>`;
-                }
-                revealInfo.innerHTML = html;
-                showScreen('reveal');
-            }
-
-            function resetGame() {
-                gameRoles = { impostors: [], detective: null, civilians: [] };
-                secretWord = '', selectedCategoryText = '';
-                isTrollModeActive = false;
-                currentPlayerIndex = 0;
-                
-                playerNameInput.value = '';
-                document.querySelectorAll('#category-checkboxes input').forEach(cb => cb.checked = false);
-                trollModeCheckbox.checked = false;
-                detectiveModeCheckbox.checked = false;
-                validateGameStart();
-                showScreen('setup');
-            }
-            
-            // --- Confetti ---
-            function triggerConfetti(colors) {
-                const canvas = confettiCanvas;
-                const ctx = canvas.getContext('2d');
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                let particles = [];
-                const particleCount = 150;
-                const confettiColors = colors.length > 0 ? colors : PLAYER_COLORS;
-
-                for (let i = 0; i < particleCount; i++) {
-                    particles.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height - canvas.height,
-                        size: Math.random() * 5 + 2,
-                        speed: Math.random() * 5 + 2,
-                        angle: Math.random() * 360,
-                        color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
-                        spin: Math.random() < 0.5 ? -1 : 1
-                    });
-                }
-
-                let animationFrame;
-                function animate() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    particles.forEach((p, i) => {
-                        p.y += p.speed;
-                        p.angle += p.spin * 5;
-                        if (p.y > canvas.height) particles.splice(i, 1);
-                        
-                        ctx.save();
-                        ctx.translate(p.x, p.y);
-                        ctx.rotate(p.angle * Math.PI / 180);
-                        ctx.fillStyle = p.color;
-                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 2);
-                        ctx.restore();
-                    });
-
-                    if (particles.length > 0) {
-                        animationFrame = requestAnimationFrame(animate);
-                    } else {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                }
-                animate();
-                setTimeout(() => cancelAnimationFrame(animationFrame), 4000);
-            }
-
-            // --- EVENT LISTENERS ---
-            addPlayerBtn.addEventListener('click', addPlayer);
-            playerNameInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') addPlayerBtn.click(); });
-            playersList.addEventListener('click', (e) => { 
-                if (e.target.tagName === 'BUTTON') { 
-                    players.splice(e.target.dataset.index, 1); 
-                    savePlayers();
-                    updatePlayersList(); 
-                } 
-            });
-            selectAllCategoriesBtn.addEventListener('click', () => {
-                const checkboxes = document.querySelectorAll('#category-checkboxes input');
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                checkboxes.forEach(cb => cb.checked = !allChecked);
-                validateGameStart();
-            });
-            detectiveModeCheckbox.addEventListener('change', validateGameStart);
-            startGameBtn.addEventListener('click', startGame);
-            roleCard.addEventListener('click', () => { 
-                if (roleCard.classList.contains('is-flipped')) return;
-                roleCard.classList.add('is-flipped'); 
-                nextPlayerBtn.classList.remove('hidden');
-                playFlipSound();
-            });
-            nextPlayerBtn.addEventListener('click', nextPlayer);
-            revealImpostorBtn.addEventListener('click', revealRoles);
-            newGameBtnIngame.addEventListener('click', resetGame);
-            newGameBtnReveal.addEventListener('click', resetGame);
-            closeErrorModalBtn.addEventListener('click', () => hideModal(errorModal));
-            statsBtn.addEventListener('click', showStats);
-            closeStatsModalBtn.addEventListener('click', () => hideModal(statsModal));
-            themeSelect.addEventListener('change', (e) => applyTheme(e.target.value));
-            muteBtn.addEventListener('click', toggleMute);
-            surpriseCategoryBtn.addEventListener('click', () => {
-                const checkboxes = Array.from(document.querySelectorAll('#category-checkboxes input'));
-                if (checkboxes.length > 0) {
-                    checkboxes.forEach(cb => cb.checked = false);
-                    const randomCheckbox = checkboxes[Math.floor(Math.random() * checkboxes.length)];
-                    randomCheckbox.checked = true;
-                    validateGameStart();
-                }
-            });
-
-            // --- INICIALIZACIÓN ---
-            const savedTheme = localStorage.getItem('imposterTheme') || 'default';
-            themeSelect.value = savedTheme;
-            applyTheme(savedTheme);
-            populateColorPicker();
-            loadPlayers();
-            loadStats();
-            populateCategories();
-            updatePlayersList();
-            showScreen('setup');
-            document.body.addEventListener('click', setupAudio, { once: true });
-        });
-    </script>
+    <script src="words.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
