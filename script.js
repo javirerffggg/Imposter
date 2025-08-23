@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Referencias a todos los elementos del DOM
+    // --- Constantes y Definiciones ---
+    const ROLES = {
+        IMPOSTOR: 'Impostor',
+        JESTER: 'Bufón',
+        MIME: 'Mimo',
+        SABOTEUR: 'Saboteador',
+        DETECTIVE: 'Detective',
+        INNOCENT: 'Inocente',
+    };
+
+    // --- Referencias a Elementos del DOM ---
     const screens = {
         setup: document.getElementById('setup-screen'),
         roleAssignment: document.getElementById('role-assignment-screen'),
@@ -24,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const accusationBtn = document.getElementById('accusation-btn');
     const newGameBtn = document.getElementById('new-game-btn');
     const revealWord = document.getElementById('reveal-word');
-    const revealImpostorsContainer = document.getElementById('reveal-impostors-container');
     const revealImpostorsList = document.getElementById('reveal-impostors-list');
     const playAgainBtn = document.getElementById('play-again-btn');
     const roundEventBanner = document.getElementById('round-event-banner');
@@ -39,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
         achievements: document.getElementById('achievements-modal'),
         theme: document.getElementById('theme-modal'),
     };
-    document.getElementById('rules-btn').addEventListener('click', () => showModal('rules'));
-    document.getElementById('achievements-btn').addEventListener('click', () => showModal('achievements'));
+    document.getElementById('rules-btn').addEventListener('click', () => { renderRulesModal(); showModal('rules'); });
+    document.getElementById('achievements-btn').addEventListener('click', () => { renderAchievementsModal(); showModal('achievements'); });
     document.getElementById('settings-btn').addEventListener('click', () => showModal('theme'));
     document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', hideAllModals));
 
@@ -61,9 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const achievementToastText = document.getElementById('achievement-toast-text');
 
     // --- Estado Global ---
-    let masterPlayerList = []; // Lista persistente de todos los jugadores y sus stats
+    let masterPlayerList = [];
     let state = {
-        players: [], // Jugadores en la partida actual
+        players: [],
         gameSettings: {},
         currentRound: {},
         currentScreen: null,
@@ -89,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showScreen(screenName) {
         const currentScreenEl = state.currentScreen ? screens[state.currentScreen] : null;
         const nextScreenEl = screens[screenName];
-
         if (currentScreenEl) {
             currentScreenEl.style.opacity = '0';
             setTimeout(() => {
@@ -116,43 +124,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica de Jugadores y Estadísticas ---
-    function loadMasterPlayerList() {
-        masterPlayerList = JSON.parse(localStorage.getItem('imposterWhoMasterList') || '[]');
-    }
-    function saveMasterPlayerList() {
-        localStorage.setItem('imposterWhoMasterList', JSON.stringify(masterPlayerList));
-    }
-    function getPlayerByName(name) {
-        return masterPlayerList.find(p => p.name.toLowerCase() === name.toLowerCase());
-    }
-    function createPlayer(name) {
-        return {
-            name,
-            stats: { games: 0, winsAsImpostor: 0, winsAsInnocent: 0, winsAsJester: 0 },
-            achievements: []
-        };
-    }
+    function loadMasterPlayerList() { masterPlayerList = JSON.parse(localStorage.getItem('imposterWhoMasterList') || '[]'); }
+    function saveMasterPlayerList() { localStorage.setItem('imposterWhoMasterList', JSON.stringify(masterPlayerList)); }
+    function getPlayerByName(name) { return masterPlayerList.find(p => p.name.toLowerCase() === name.toLowerCase()); }
+    function createPlayer(name) { return { name, stats: { games: 0, winsAsImpostor: 0, winsAsInnocent: 0, winsAsJester: 0 }, achievements: [] }; }
+    
     function addPlayerToGame(name) {
-        if (!name || state.players.length >= 12 || state.players.some(p => p.name === name)) return;
+        const trimmedName = name.trim();
+        if (!trimmedName || state.players.length >= 12 || state.players.some(p => p.name === trimmedName)) return;
         soundManager.playAdd();
-        let player = getPlayerByName(name);
+        let player = getPlayerByName(trimmedName);
         if (!player) {
-            player = createPlayer(name);
+            player = createPlayer(trimmedName);
             masterPlayerList.push(player);
         }
         state.players.push(player);
+        playerNameInput.value = '';
         renderPlayers();
         saveMasterPlayerList();
     }
+    
     function renderPlayers() {
         playersList.innerHTML = '';
         state.players.forEach((player, index) => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center bg-[var(--bg-main)] p-2 rounded-lg animate-fade-in-down';
             li.innerHTML = `
-                <span class="cursor-pointer flex-grow">${player.name}</span>
+                <span class="cursor-pointer flex-grow p-1">${player.name}</span>
                 <button data-index="${index}" class="remove-player-btn text-gray-500 hover:text-[var(--role-impostor)] transition-colors p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
             `;
             li.querySelector('span').addEventListener('click', () => showPlayerStats(player.name));
@@ -160,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         validateGameStart();
     }
+    
     function showPlayerStats(playerName) {
         const player = getPlayerByName(playerName);
         if (!player) return;
@@ -175,19 +176,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Lógica de Roles y Partida ---
+    
+    /**
+     * Asigna roles a los jugadores de la partida actual.
+     * La lógica incluye la selección ponderada de impostores y la asignación aleatoria del resto de roles especiales.
+     * @returns {void}
+     */
     function assignRoles() {
         let playersToAssign = [...state.players];
         state.currentRound.assignments = [];
         
         let availableRoles = [];
-        if (state.gameSettings.useJesterMode) availableRoles.push('Bufón');
-        if (state.gameSettings.useMimeMode) availableRoles.push('Mimo');
-        if (state.gameSettings.useSaboteurMode) availableRoles.push('Saboteador');
-        if (state.gameSettings.useDetectiveMode) availableRoles.push('Detective');
+        if (state.gameSettings.useJesterMode) availableRoles.push(ROLES.JESTER);
+        if (state.gameSettings.useMimeMode) availableRoles.push(ROLES.MIME);
+        if (state.gameSettings.useSaboteurMode) availableRoles.push(ROLES.SABOTEUR);
+        if (state.gameSettings.useDetectiveMode) availableRoles.push(ROLES.DETECTIVE);
 
         const impostors = selectWeightedPlayers(playersToAssign, state.gameSettings.impostorCount);
         impostors.forEach(impostor => {
-            state.currentRound.assignments.push({ player: impostor, role: 'Impostor' });
+            state.currentRound.assignments.push({ player: impostor, role: ROLES.IMPOSTOR });
         });
         playersToAssign = playersToAssign.filter(p => !impostors.includes(p));
 
@@ -200,13 +207,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         playersToAssign.forEach(player => {
-            state.currentRound.assignments.push({ player, role: 'Inocente' });
+            state.currentRound.assignments.push({ player, role: ROLES.INNOCENT });
         });
 
         const wordPool = getWordPool();
         state.currentRound.assignments.forEach(a => {
-            if (a.role === 'Impostor' || a.role === 'Bufón') { a.word = '???'; } 
-            else if (a.role === 'Saboteador') {
+            if (a.role === ROLES.IMPOSTOR || a.role === ROLES.JESTER) { a.word = '???'; } 
+            else if (a.role === ROLES.SABOTEUR) {
                 const possibleWords = wordPool.filter(w => w !== state.currentRound.word);
                 a.word = possibleWords[Math.floor(Math.random() * possibleWords.length)] || state.currentRound.word;
             } else { a.word = state.currentRound.word; }
@@ -219,11 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('current-player-name').textContent = assignment.player.name;
         let title = '', description = '';
         switch(assignment.role) {
-            case 'Impostor': title = '🤫 ¡Eres IMPOSTOR!'; description = 'Descubre la palabra secreta.'; if(state.gameSettings.impostorCount > 0) soundManager.playRevealImpostor(); break;
-            case 'Bufón': title = '🃏 ¡Eres BUFÓN!'; description = '¡Consigue que te eliminen para ganar!'; break;
-            case 'Mimo': title = '🤐 ¡Eres MIMO!'; description = `La palabra es <strong>${assignment.word}</strong>. ¡NO PUEDES HABLAR!`; break;
-            case 'Saboteador': title = '💣 ¡Eres SABOTEADOR!'; description = `Tu palabra es: <strong>${assignment.word}</strong>.`; break;
-            case 'Detective': title = '🕵️ ¡Eres DETECTIVE!'; description = `La palabra es: <strong>${assignment.word}</strong>.`; break;
+            case ROLES.IMPOSTOR: title = '🤫 ¡Eres IMPOSTOR!'; description = 'Descubre la palabra secreta.'; if(state.gameSettings.impostorCount > 0) soundManager.playRevealImpostor(); break;
+            case ROLES.JESTER: title = '🃏 ¡Eres BUFÓN!'; description = '¡Consigue que te eliminen para ganar!'; break;
+            case ROLES.MIME: title = '🤐 ¡Eres MIMO!'; description = `La palabra es <strong>${assignment.word}</strong>. ¡NO PUEDES HABLAR!`; break;
+            case ROLES.SABOTEUR: title = '💣 ¡Eres SABOTEADOR!'; description = `Tu palabra es: <strong>${assignment.word}</strong>.`; break;
+            case ROLES.DETECTIVE: title = '🕵️ ¡Eres DETECTIVE!'; description = `La palabra es: <strong>${assignment.word}</strong>.`; break;
             default: title = '😇 Eres INOCENTE'; description = `La palabra es: <strong>${assignment.word}</strong>.`; break;
         }
         roleTitle.innerHTML = title;
@@ -239,10 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentRound.word = wordPool[Math.floor(Math.random() * wordPool.length)];
         state.currentRound.startingPlayer = state.players[Math.floor(Math.random() * state.players.length)];
         
-        if (state.gameSettings.useRoundEvents && Math.random() < 0.15) {
-            const events = [{id: 'double_vote', text: `¡VOTO DOBLE! ${state.players[Math.floor(Math.random()*state.players.length)].name} tiene dos votos.`}];
+        if (state.gameSettings.useRoundEvents && Math.random() < 0.25) { // 25% chance
+            const events = [{id: 'double_vote', text: `¡VOTO DOBLE! <strong>${state.players[Math.floor(Math.random()*state.players.length)].name}</strong> tiene dos votos esta ronda.`}];
             state.currentRound.activeEvent = events[0];
-            roundEventText.textContent = state.currentRound.activeEvent.text;
+            roundEventText.innerHTML = state.currentRound.activeEvent.text;
             roundEventBanner.classList.remove('hidden');
         } else {
             roundEventBanner.classList.add('hidden');
@@ -255,6 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Lógica de Fin de Partida ---
+    
+    /**
+     * Procesa el final de la partida después de una acusación.
+     * @param {string} eliminatedPlayerName - El nombre del jugador eliminado.
+     * @returns {void}
+     */
     function handleAccusation(eliminatedPlayerName) {
         state.currentRound.eliminatedPlayer = eliminatedPlayerName;
         const eliminatedAssignment = state.currentRound.assignments.find(a => a.player.name === eliminatedPlayerName);
@@ -262,21 +275,21 @@ document.addEventListener('DOMContentLoaded', () => {
         let overlayText = '';
         let overlayGradient = '';
 
-        if (eliminatedAssignment.role === 'Bufón') {
-            winner = 'Bufón';
+        if (eliminatedAssignment.role === ROLES.JESTER) {
+            winner = ROLES.JESTER;
             overlayText = '¡EL BUFÓN GANA!';
             overlayGradient = 'from-yellow-400 to-orange-500';
             soundManager.playWin();
         } else {
-            const impostors = state.currentRound.assignments.filter(a => a.role === 'Impostor');
+            const impostors = state.currentRound.assignments.filter(a => a.role === ROLES.IMPOSTOR);
             const impostorWasEliminated = impostors.some(i => i.player.name === eliminatedPlayerName);
             if (impostorWasEliminated || impostors.length === 0) {
-                winner = 'Inocentes';
+                winner = ROLES.INNOCENT;
                 overlayText = '¡INOCENTES GANAN!';
                 overlayGradient = 'from-blue-400 to-green-400';
                 soundManager.playWin();
             } else {
-                winner = 'Impostores';
+                winner = ROLES.IMPOSTOR;
                 overlayText = '¡IMPOSTORES GANAN!';
                 overlayGradient = 'from-red-500 to-purple-600';
                 soundManager.playLose();
@@ -296,21 +309,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function showRevealScreen() {
         winLossOverlay.classList.add('hidden');
         revealWord.textContent = state.currentRound.word;
-        const impostors = state.currentRound.assignments.filter(a => a.role === 'Impostor');
+        const impostors = state.currentRound.assignments.filter(a => a.role === ROLES.IMPOSTOR);
         revealImpostorsList.innerHTML = impostors.map(a => `<li>${a.player.name}</li>`).join('');
-        // Aquí iría la lógica para mostrar otros roles
+        // Aquí iría la lógica para mostrar otros roles si se quisiera
         showScreen('reveal');
     }
-
+    
+    /**
+     * Actualiza las estadísticas de todos los jugadores al final de la partida.
+     * @param {string} winner - El rol o bando ganador ('Inocente', 'Impostor', 'Bufón').
+     * @returns {void}
+     */
     function updateAllStats(winner) {
         state.currentRound.assignments.forEach(a => {
             const player = getPlayerByName(a.player.name);
             if (!player) return;
             player.stats.games++;
             let isWinner = false;
-            if (winner === 'Bufón' && a.role === 'Bufón') { player.stats.winsAsJester++; isWinner = true; }
-            if (winner === 'Inocentes' && !['Impostor', 'Bufón', 'Saboteador'].includes(a.role)) { player.stats.winsAsInnocent++; isWinner = true; }
-            if (winner === 'Impostores' && a.role === 'Impostor') { player.stats.winsAsImpostor++; isWinner = true; }
+            if (winner === ROLES.JESTER && a.role === ROLES.JESTER) { player.stats.winsAsJester++; isWinner = true; }
+            if (winner === ROLES.INNOCENT && ![ROLES.IMPOSTOR, ROLES.JESTER, ROLES.SABOTEUR].includes(a.role)) { player.stats.winsAsInnocent++; isWinner = true; }
+            if (winner === ROLES.IMPOSTOR && a.role === ROLES.IMPOSTOR) { player.stats.winsAsImpostor++; isWinner = true; }
             
             checkAndUnlockAchievements(player, isWinner, a.role);
         });
@@ -318,6 +336,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Lógica de Logros ---
+    /**
+     * Comprueba si un jugador ha desbloqueado algún logro.
+     * @param {object} player - El objeto completo del jugador de `masterPlayerList`.
+     * @param {boolean} isWinner - Si el jugador ganó la partida.
+     * @param {string} role - El rol del jugador en la partida.
+     * @returns {void}
+     */
     function checkAndUnlockAchievements(player, isWinner, role) {
         const context = {
             votesAgainst: state.currentRound.eliminatedPlayer === player.name ? 1 : 0,
@@ -368,7 +393,69 @@ document.addEventListener('DOMContentLoaded', () => {
             categoriesContainer.appendChild(label);
         });
     }
-    // ... (resto de funciones CRUD para listas y presets)
+    
+    function getPresets() { return JSON.parse(localStorage.getItem('imposterWhoPresets') || '[]'); }
+    function savePresets(presets) { localStorage.setItem('imposterWhoPresets', JSON.stringify(presets)); }
+    function renderPresets() {
+        const presets = getPresets();
+        presetSelect.innerHTML = '<option value="">-- Cargar --</option>';
+        presets.forEach(preset => {
+            const option = document.createElement('option');
+            option.value = preset.name;
+            option.textContent = preset.name;
+            presetSelect.appendChild(option);
+        });
+    }
+    function loadPreset(presetName) {
+        const preset = getPresets().find(p => p.name === presetName);
+        if (!preset) return;
+        impostorCountSelect.value = preset.impostorCount;
+        document.querySelectorAll('.game-mode-cb').forEach(cb => {
+            const mode = cb.id.replace('-mode', '');
+            cb.checked = preset[mode];
+        });
+        // Actualizar estado
+        Object.assign(state.gameSettings, preset);
+    }
+
+    // --- Renderizado de Modales ---
+    function renderRulesModal() {
+        document.getElementById('rules-content').innerHTML = `
+            <div class="space-y-3 text-[var(--text-dark)]">
+                <p><strong>Objetivo:</strong> Los <strong>Inocentes</strong> deben descubrir quién es el <strong>Impostor</strong>. El <strong>Impostor</strong> debe engañar a todos y evitar ser descubierto.</p>
+                <hr class="border-gray-600">
+                <p><strong>😇 Inocente:</strong> Conoces la palabra secreta. Da pistas sutiles para encontrar a otros inocentes.</p>
+                <p><strong>🤫 Impostor:</strong> NO conoces la palabra. Finge que la sabes y trata de adivinarla.</p>
+                <p><strong>💣 Saboteador:</strong> Tienes una palabra diferente pero relacionada. Tu objetivo es crear caos.</p>
+                <p><strong>🕵️ Detective:</strong> Conoces la palabra y tu objetivo es encontrar al Impostor.</p>
+                <p><strong>🃏 Bufón:</strong> NO conoces la palabra. Tu objetivo es que te voten para ser eliminado. Si lo consigues, ganas tú solo.</p>
+                <p><strong>🤐 Mimo:</strong> Eres un Inocente, pero no puedes hablar. ¡Usa solo gestos!</p>
+            </div>
+        `;
+    }
+    function renderAchievementsModal() {
+        const achievementsList = document.getElementById('achievements-list');
+        const playerAchievements = masterPlayerList.flatMap(p => p.achievements);
+        achievementsList.innerHTML = Object.entries(achievements).map(([key, ach]) => {
+            const unlocked = playerAchievements.includes(key);
+            return `<div class="p-2 ${unlocked ? 'opacity-100' : 'opacity-40'}">
+                        <h4 class="font-bold text-[var(--text-light)]">${unlocked ? '🏆' : '🔒'} ${ach.name}</h4>
+                        <p class="text-sm text-[var(--text-dark)]">${ach.description}</p>
+                    </div>`;
+        }).join('');
+    }
+    
+    // --- Lógica de Acusación ---
+    function renderAccusationList() {
+        accusationPlayerList.innerHTML = '';
+        state.players.forEach(player => {
+            const button = document.createElement('button');
+            button.className = 'w-full p-3 bg-[var(--bg-main)] rounded-lg text-lg hover:bg-[var(--accent-secondary)] transition-colors';
+            button.textContent = player.name;
+            button.dataset.playerName = player.name;
+            accusationPlayerList.appendChild(button);
+        });
+    }
 
     // --- Inicialización ---
     function init() {
@@ -378,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTheme();
         renderCategories();
         renderPlayers();
-        // Cargar y renderizar presets, reglas, logros, etc.
+        renderPresets();
         showScreen('setup');
     }
     
@@ -393,11 +480,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     startGameBtn.addEventListener('click', startGame);
-    accusationBtn.addEventListener('click', () => showScreen('accusation'));
+    accusationBtn.addEventListener('click', () => { renderAccusationList(); showScreen('accusation'); });
+    accusationPlayerList.addEventListener('click', (e) => {
+        if (e.target.dataset.playerName) {
+            handleAccusation(e.target.dataset.playerName);
+        }
+    });
     nextPlayerBtn.addEventListener('click', () => {
         state.currentRound.currentPlayerIndex++;
         if (state.currentRound.currentPlayerIndex < state.currentRound.assignments.length) {
             roleCard.classList.remove('is-flipped');
+            nextPlayerBtn.classList.add('hidden');
             setTimeout(displayCurrentPlayerRole, 400);
         } else {
             showScreen('inGame');
@@ -409,9 +502,37 @@ document.addEventListener('DOMContentLoaded', () => {
         roleCard.classList.add('is-flipped');
         nextPlayerBtn.classList.remove('hidden');
     });
-    // ... (resto de listeners)
+    
     customListsBtn.addEventListener('click', () => showScreen('customLists'));
     backToSetupBtn.addEventListener('click', () => { renderCategories(); showScreen('setup'); });
+    saveListBtn.addEventListener('click', () => {
+        const name = newListNameInput.value.trim();
+        const words = newListWordsTextarea.value.split('\n').map(w => w.trim()).filter(Boolean);
+        if (name && words.length > 0) {
+            const lists = getCustomLists();
+            lists.push({ category: name, words });
+            saveCustomLists(lists);
+            newListNameInput.value = '';
+            newListWordsTextarea.value = '';
+            // Aquí se podría renderizar la lista de listas personalizadas
+        }
+    });
+    
+    savePresetBtn.addEventListener('click', () => {
+        const name = prompt("Nombre para este preset:");
+        if (!name) return;
+        const preset = { name, impostorCount: impostorCountSelect.value };
+        document.querySelectorAll('.game-mode-cb').forEach(cb => {
+            preset[cb.id.replace('-mode', '')] = cb.checked;
+        });
+        const presets = getPresets();
+        presets.push(preset);
+        savePresets(presets);
+        renderPresets();
+    });
+    presetSelect.addEventListener('change', (e) => {
+        if(e.target.value) loadPreset(e.target.value);
+    });
 
     // --- Lógica de Temas ---
     function applyTheme(theme) {
@@ -441,6 +562,25 @@ document.addEventListener('DOMContentLoaded', () => {
             else state.gameSettings.selectedCategories.delete(category);
             validateGameStart();
         }
+    });
+    
+    document.querySelectorAll('.game-mode-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const settingName = 'use' + cb.id.charAt(0).toUpperCase() + cb.id.slice(1).replace('-mode', '');
+            state.gameSettings[settingName] = cb.checked;
+        });
+    });
+
+    playAgainBtn.addEventListener('click', () => {
+        resetCurrentRound();
+        showScreen('setup');
+    });
+
+    newGameBtn.addEventListener('click', () => {
+        state.players = [];
+        resetCurrentRound();
+        renderPlayers();
+        showScreen('setup');
     });
     
     init();
