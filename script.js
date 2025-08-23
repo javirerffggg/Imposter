@@ -448,7 +448,6 @@ document.addEventListener('DOMContentLoaded', () => {
         soundManager.playCardFlip();
         roleCard.classList.add('is-flipped');
 
-        // CORRECCIÓN: Lógica para cambiar el texto del botón
         if (state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length - 1) {
             nextPlayerBtn.textContent = 'Empezar Partida';
         } else {
@@ -459,15 +458,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextPlayerBtn.addEventListener('click', () => {
         soundManager.playClick();
-        state.currentRound.currentPlayerIndex++;
         
-        const isLastPlayer = state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length;
-
-        if (isLastPlayer) {
-            // CORRECCIÓN: El error estaba aquí. Se debe actualizar el nombre y LUEGO mostrar la pantalla.
+        if (state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length - 1) {
             startingPlayerName.textContent = state.currentRound.startingPlayer.name;
-            showScreen('in-game');
+            showScreen('inGame');
         } else {
+            state.currentRound.currentPlayerIndex++;
             roleCard.classList.remove('is-flipped');
             nextPlayerBtn.classList.add('hidden');
             setTimeout(displayCurrentPlayerRole, 400);
