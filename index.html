@@ -18,39 +18,18 @@
         body.theme-noir { --bg-main: #1a1a1a; --bg-card: #2b2b2b; --accent-primary: #E5E5E5; --accent-secondary: #f43f5e; --text-light: #E5E5E5; --text-dark: #a1a1a1; --font-title: 'Merriweather', serif; --font-body: 'Merriweather', serif; }
         body.theme-retro { --bg-main: #0D0D0D; --bg-card: #1A1A1A; --accent-primary: #00FF00; --accent-secondary: #FF00FF; --role-impostor: #FF0000; --role-detective: #00FFFF; --text-light: #FFFFFF; --text-dark: #AAAAAA; --font-title: 'Press Start 2P', cursive; --font-body: 'Press Start 2P', cursive; }
         body.theme-manuscript { --bg-main: #fdf6e3; --bg-card: #eee8d5; --accent-primary: #268bd2; --accent-secondary: #d33682; --role-impostor: #dc322f; --role-detective: #2aa198; --text-light: #586e75; --text-dark: #839496; --font-title: 'Merriweather', serif; --font-body: 'Merriweather', serif; }
-        
         body { font-family: var(--font-body); background-color: var(--bg-main); color: var(--text-light); background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231E293B' fill-opacity='0.4' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3C/g%3E%3C/svg%3E"); transition: background-color 0.5s ease, color 0.5s ease; }
         h1, h2, h3 { font-family: var(--font-title); }
         .screen { transition: opacity 0.4s ease-in-out; }
-        
-        /* Estilos de Tarjeta (Sin cambios) */
         .scene { perspective: 1000px; }
         .card { transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
         .card.is-flipped { transform: rotateY(180deg); }
         .card__face { -webkit-backface-visibility: hidden; backface-visibility: hidden; }
         .card__face--back { transform: rotateY(180deg); }
-
-        /* NUEVO: Lógica de flip segura (basada en el doc) */
-        .card.flip-out { transform: rotateY(-180deg); }
-        .card.flip-in { transform: rotateY(0deg); }
-
-        /* NUEVO: Pulso de Impostor */
-        @keyframes impostorPulse {
-            0% { box-shadow: 0 0 0 0px var(--role-impostor); }
-            50% { box-shadow: 0 0 20px 5px var(--role-impostor); }
-            100% { box-shadow: 0 0 0 0px var(--role-impostor); }
-        }
-        .impostor-pulse {
-            animation: impostorPulse 1.5s ease-in-out;
-        }
-
-        /* Animaciones (Sin cambios) */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-down { animation: fadeInDown 0.5s ease-out forwards; }
         @keyframes pulseGlow { 0%, 100% { text-shadow: 0 0 8px var(--accent-primary), 0 0 16px var(--accent-primary); } 50% { text-shadow: 0 0 16px var(--accent-primary), 0 0 32px var(--accent-primary); } }
         .animate-pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
-        
-        /* Estilos de Checkbox (Sin cambios) */
         .custom-checkbox:checked { background-color: var(--accent-primary); border-color: var(--accent-primary); }
         .custom-checkbox:checked::after { content: '✔'; color: var(--bg-main); display: block; text-align: center; line-height: 1.25rem; font-weight: bold; }
         .category-label:has(.custom-checkbox:checked) span { color: var(--accent-primary); font-weight: 600; }
@@ -60,26 +39,8 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div style="display: none;">
-        <svg xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                </symbol>
-                <symbol id="avatar-1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="currentColor"/></symbol>
-                <symbol id="avatar-2" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80" fill="currentColor"/></symbol>
-                <symbol id="avatar-3" viewBox="0 0 100 100"><polygon points="50,10 90,90 10,90" fill="currentColor"/></symbol>
-                <symbol id="avatar-4" viewBox="0 0 100 100"><polygon points="50,10 60,40 90,40 65,60 75,90 50,70 25,90 35,60 10,40 40,40" fill="currentColor"/></symbol>
-                <symbol id="avatar-5" viewBox="0 0 100 100"><path d="M50 10 C 20 10, 20 90, 50 90 C 80 90, 80 10, 50 10 Z" fill="currentColor"/></symbol>
-                <symbol id="avatar-6" viewBox="0 0 100 100"><path d="M10 10 H 90 V 90 H 10 Z M 30 30 H 70 V 70 H 30 Z" fill="currentColor"/></symbol>
-                <symbol id="avatar-7" viewBox="0 0 100 100"><polygon points="50,10 50,10 90,50 90,50 50,90 50,90 10,50 10,50" fill="currentColor"/></symbol>
-                <symbol id="avatar-8" viewBox="0 0 100 100"><path d="M50,10 L90,90 H10 L50,10 M50,30 L70,70 H30 L50,30" fill="currentColor" fill-rule="evenodd"/></symbol>
-            </defs>
-        </svg>
-    </div>
-
     <div id="app" class="w-full max-w-md mx-auto">
+        <!-- Pantallas del juego -->
         <div id="setup-screen" class="space-y-8">
             <h1 class="text-5xl font-bold text-center text-[var(--text-light)] tracking-wider">Imposter Who?</h1>
             
@@ -160,6 +121,7 @@
             <h2 class="text-3xl font-bold text-gray-300">¡La partida ha comenzado!</h2>
             <p class="text-xl">Empieza la discusión: <span id="starting-player-name" class="text-green-400 font-semibold"></span></p>
             <div class="space-y-4">
+                <!-- CORRECCIÓN: Texto del botón cambiado -->
                 <button id="accusation-btn" class="w-full bg-gradient-to-r from-[var(--accent-secondary)] to-[var(--role-impostor)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Revelar Roles</button>
                 <button id="new-game-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-xl transition-colors">Nuevo Juego</button>
             </div>
@@ -174,10 +136,14 @@
         <div id="reveal-screen" class="hidden text-center space-y-6 bg-[var(--bg-card)] p-8 rounded-xl border border-gray-700/50">
             <h2 class="text-4xl font-bold text-gray-300">Resultados</h2>
             <div class="text-left space-y-4 text-lg">
+                <!-- CORRECCIÓN: Se ha eliminado opacity-0 para que el contenido sea visible -->
                 <p>La palabra era: <strong id="reveal-word" class="text-yellow-400 font-bold"></strong></p>
-            </div>
-            <div id="reveal-grid" class="grid grid-cols-3 gap-2 sm:gap-4">
+                <div id="reveal-impostors-container">
+                    <p>Impostor(es):</p>
+                    <ul id="reveal-impostors-list" class="list-disc list-inside text-[var(--role-impostor)] font-semibold"></ul>
                 </div>
+                <!-- Aquí se podrían añadir los otros roles revelados si se desea -->
+            </div>
             <button id="play-again-btn" class="w-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl hover:scale-105">Jugar de Nuevo</button>
         </div>
 
@@ -194,6 +160,7 @@
         </div>
     </div>
 
+    <!-- Iconos de menú y Modales -->
     <div class="fixed top-4 right-4 flex gap-3">
         <button id="rules-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></button>
         <button id="achievements-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.55 3.32a10 10 0 1 1-5.1 17.4"/><path d="m14 6-4.27 4.27a1 1 0 0 0 0 1.42L14 16"/><path d="M18 10h-5.27"/><path d="M6 18H5c-1.1 0-2-.9-2-2v-1c0-1.1.9-2 2-2h1"/></svg></button>
@@ -201,23 +168,16 @@
         <button id="settings-btn" class="menu-btn"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
 
+    <!-- Modales -->
     <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4"><div class="bg-[var(--bg-card)] p-6 rounded-xl w-full max-w-lg"><h2 class="text-2xl font-bold mb-4">Guía de Roles</h2><div id="rules-content"></div><button class="modal-close-btn w-full mt-4 bg-gray-600 p-2 rounded-lg">Cerrar</button></div></div>
     <div id="player-stats-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4"><div class="bg-[var(--bg-card)] p-6 rounded-xl w-full max-w-sm"><h2 id="stats-player-name" class="text-2xl font-bold mb-4"></h2><div id="stats-content"></div><button class="modal-close-btn w-full mt-4 bg-gray-600 p-2 rounded-lg">Cerrar</button></div></div>
     <div id="achievements-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4"><div class="bg-[var(--bg-card)] p-6 rounded-xl w-full max-w-lg"><h2 class="text-2xl font-bold mb-4">Logros</h2><div id="achievements-list" class="max-h-96 overflow-y-auto"></div><button class="modal-close-btn w-full mt-4 bg-gray-600 p-2 rounded-lg">Cerrar</button></div></div>
     <div id="theme-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4"><div class="bg-[var(--bg-card)] p-6 rounded-xl w-full max-w-sm"><h2 class="text-2xl font-bold mb-4">Seleccionar Tema</h2><div class="grid grid-cols-2 gap-4"><button class="theme-btn border-2 p-4 rounded-lg" data-theme="default">Neón</button><button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-noir">Noir</button><button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-retro">Retro</button><button class="theme-btn border-2 p-4 rounded-lg" data-theme="theme-manuscript">Manuscrito</button></div><button class="modal-close-btn w-full mt-6 bg-gray-600 p-2 rounded-lg">Cerrar</button></div></div>
-    
-    <div id="avatar-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4">
-        <div class="bg-[var(--bg-card)] p-6 rounded-xl w-full max-w-md">
-            <h2 id="avatar-modal-title" class="text-2xl font-bold mb-4">Elegir Avatar</h2>
-            <div id="avatar-grid" class="grid grid-cols-4 gap-4">
-                </div>
-            <button class="modal-close-btn w-full mt-6 bg-gray-600 p-2 rounded-lg">Cerrar</button>
-        </div>
-    </div>
 
-
+    <!-- Overlays de Victoria/Derrota -->
     <div id="win-loss-overlay" class="hidden fixed inset-0 flex items-center justify-center text-white text-6xl md:text-8xl font-bold uppercase tracking-widest animate-fade-in-down" style="text-shadow: 0 0 20px black;"></div>
     
+    <!-- Notificación de Logro -->
     <div id="achievement-toast" class="hidden fixed bottom-4 right-4 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white p-4 rounded-lg shadow-2xl transform translate-y-20 opacity-0 achievement-toast">
         <h3 class="font-bold">🏆 ¡Logro Desbloqueado!</h3>
         <p id="achievement-toast-text"></p>
