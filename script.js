@@ -9,13 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
         DETECTIVE: 'Detective',
         INNOCENT: 'Inocente',
     };
+    
+    // NUEVO: Lista de avatares disponibles
+    const availableAvatars = ['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6', 'avatar-7', 'avatar-8'];
 
     // --- Referencias a Elementos del DOM ---
     const screens = {
         setup: document.getElementById('setup-screen'),
         roleAssignment: document.getElementById('role-assignment-screen'),
         inGame: document.getElementById('in-game-screen'),
-        // accusation: document.getElementById('accusation-screen'), // Eliminado del flujo
         reveal: document.getElementById('reveal-screen'),
         customLists: document.getElementById('custom-lists-screen'),
     };
@@ -27,18 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleCategoriesBtn = document.getElementById('toggle-categories-btn');
     const startGameBtn = document.getElementById('start-game-btn');
     const roleCard = document.getElementById('role-card');
+    const roleCardBack = document.getElementById('role-card-back'); // NUEVO
     const roleTitle = document.getElementById('role-title');
     const roleDescription = document.getElementById('role-description');
     const nextPlayerBtn = document.getElementById('next-player-btn');
     const startingPlayerName = document.getElementById('starting-player-name');
-    const accusationBtn = document.getElementById('accusation-btn'); // Este botón ahora revela los roles
+    const accusationBtn = document.getElementById('accusation-btn');
     const newGameBtn = document.getElementById('new-game-btn');
     const revealWord = document.getElementById('reveal-word');
-    const revealImpostorsList = document.getElementById('reveal-impostors-list');
+    // const revealImpostorsList = document.getElementById('reveal-impostors-list'); // Obsoleto
+    const revealGrid = document.getElementById('reveal-grid'); // NUEVO
     const playAgainBtn = document.getElementById('play-again-btn');
     const roundEventBanner = document.getElementById('round-event-banner');
     const roundEventText = document.getElementById('round-event-text');
-    // const accusationPlayerList = document.getElementById('accusation-player-list'); // Ya no se usa
     const winLossOverlay = document.getElementById('win-loss-overlay');
     
     // Modales y sus botones
@@ -47,13 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
         playerStats: document.getElementById('player-stats-modal'),
         achievements: document.getElementById('achievements-modal'),
         theme: document.getElementById('theme-modal'),
+        avatar: document.getElementById('avatar-modal'), // NUEVO
     };
     document.getElementById('rules-btn').addEventListener('click', () => { renderRulesModal(); showModal('rules'); });
     document.getElementById('achievements-btn').addEventListener('click', () => { renderAchievementsModal(); showModal('achievements'); });
     document.getElementById('settings-btn').addEventListener('click', () => showModal('theme'));
     document.querySelectorAll('.modal-close-btn').forEach(btn => btn.addEventListener('click', hideAllModals));
 
-    // Lógica de Listas Personalizadas
+    // Lógica de Listas Personalizadas (Sin cambios)
     const customListsBtn = document.getElementById('custom-lists-btn');
     const backToSetupBtn = document.getElementById('back-to-setup-btn');
     const saveListBtn = document.getElementById('save-list-btn');
@@ -61,11 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const newListWordsTextarea = document.getElementById('new-list-words');
     const customListsContainer = document.getElementById('custom-lists-container');
     
-    // Lógica de Presets
+    // Lógica de Presets (Sin cambios)
     const savePresetBtn = document.getElementById('save-preset-btn');
     const presetSelect = document.getElementById('preset-select');
 
-    // Lógica de Logros
+    // Lógica de Logros (Sin cambios)
     const achievementToast = document.getElementById('achievement-toast');
     const achievementToastText = document.getElementById('achievement-toast-text');
 
@@ -80,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetGameSettings = () => { state.gameSettings = { impostorCount: 1, selectedCategories: new Set(), useImpostorHint: false, useTrollMode: false, useSaboteurMode: false, useDetectiveMode: false, useJesterMode: false, useMimeMode: false, useRoundEvents: false }; };
     const resetCurrentRound = () => { state.currentRound = { word: '', category: '', isCustomCategory: false, startingPlayer: null, assignments: [], currentPlayerIndex: 0, activeEvent: null, eliminatedPlayer: null }; };
 
-    // --- Sound Manager ---
+    // --- Sound Manager (Sin cambios) ---
     const soundManager = {
         synth: new Tone.Synth().toDestination(),
         init() { document.body.addEventListener('click', () => Tone.start(), { once: true }); },
@@ -94,7 +98,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     soundManager.init();
 
-    // --- Lógica de UI General ---
+    // --- NUEVO: Haptic Manager (basado en el doc) ---
+    const hapticManager = {
+        patterns: {
+            civil: [50], // Toque corto y nítido
+            impostor: [150], // Zumbido grave y sostenido
+            win: [50, 50, 50], // Serie rápida
+            click: [20]
+        },
+        vibrate(pattern) {
+            if (navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+    };
+
+    // --- Lógica de UI General (Sin cambios) ---
     function showScreen(screenName) {
         const currentScreenEl = state.currentScreen ? screens[state.currentScreen] : null;
         const nextScreenEl = screens[screenName];
@@ -123,12 +142,22 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.values(modals).forEach(m => m.classList.add('hidden'));
     }
 
-    // --- Lógica de Jugadores y Estadísticas ---
+    // --- Lógica de Jugadores y Estadísticas (MODIFICADA) ---
     function loadMasterPlayerList() { masterPlayerList = JSON.parse(localStorage.getItem('imposterWhoMasterList') || '[]'); }
     function saveMasterPlayerList() { localStorage.setItem('imposterWhoMasterList', JSON.stringify(masterPlayerList)); }
     function getPlayerByName(name) { return masterPlayerList.find(p => p.name.toLowerCase() === name.toLowerCase()); }
-    function createPlayer(name) { return { name, stats: { games: 0, winsAsImpostor: 0, winsAsInnocent: 0, winsAsJester: 0 }, achievements: [] }; }
     
+    // MODIFICADO: createPlayer ahora incluye un avatar
+    function createPlayer(name) {
+        return {
+            name,
+            avatar: availableAvatars[masterPlayerList.length % availableAvatars.length], // Asigna un avatar por defecto
+            stats: { games: 0, winsAsImpostor: 0, winsAsInnocent: 0, winsAsJester: 0 },
+            achievements: []
+        };
+    }
+    
+    // MODIFICADO: addPlayerToGame ahora maneja avatares
     function addPlayerToGame(name) {
         const trimmedName = name.trim();
         if (!trimmedName || state.players.length >= 12 || state.players.some(p => p.name === trimmedName)) return;
@@ -138,30 +167,75 @@ document.addEventListener('DOMContentLoaded', () => {
             player = createPlayer(trimmedName);
             masterPlayerList.push(player);
         }
+        // Asegura que el jugador tenga un avatar si es un perfil antiguo
+        if (!player.avatar) {
+            player.avatar = availableAvatars[0];
+        }
+        
         state.players.push(player);
         playerNameInput.value = '';
         renderPlayers();
         saveMasterPlayerList();
     }
     
+    // MODIFICADO: renderPlayers ahora muestra avatares
     function renderPlayers() {
         playersList.innerHTML = '';
         state.players.forEach((player, index) => {
             const li = document.createElement('li');
             li.className = 'flex justify-between items-center bg-[var(--bg-main)] p-2 rounded-lg animate-fade-in-down';
             li.innerHTML = `
-                <span class="cursor-pointer flex-grow p-1">${player.name}</span>
+                <div class="flex items-center gap-3">
+                    <button class="edit-avatar-btn p-1 rounded-full hover:bg-gray-700" data-name="${player.name}">
+                        <svg class="w-8 h-8 text-[var(--accent-primary)]" fill="currentColor"><use href="#${player.avatar}"></use></svg>
+                    </button>
+                    <span class="cursor-pointer flex-grow p-1 text-lg" data-name="${player.name}">${player.name}</span>
+                </div>
                 <button data-index="${index}" class="remove-player-btn text-gray-500 hover:text-[var(--role-impostor)] transition-colors p-1">
                     <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pointer-events-none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
             `;
-            li.querySelector('span').addEventListener('click', () => showPlayerStats(player.name));
+            li.querySelector('span').addEventListener('click', (e) => showPlayerStats(e.target.dataset.name));
+            li.querySelector('.edit-avatar-btn').addEventListener('click', (e) => showAvatarModal(e.currentTarget.dataset.name));
             playersList.appendChild(li);
         });
         validateGameStart();
     }
+
+    // NUEVO: Lógica para el modal de avatares
+    function showAvatarModal(playerName) {
+        const player = getPlayerByName(playerName);
+        if (!player) return;
+        
+        document.getElementById('avatar-modal-title').textContent = `Avatar de ${player.name}`;
+        const avatarGrid = document.getElementById('avatar-grid');
+        avatarGrid.innerHTML = '';
+        
+        availableAvatars.forEach(avatarId => {
+            const isSelected = player.avatar === avatarId;
+            const btn = document.createElement('button');
+            btn.className = `p-2 rounded-lg transition-all ${isSelected ? 'bg-[var(--accent-primary)] text-[var(--bg-main)]' : 'bg-[var(--bg-main)] text-white hover:bg-gray-700'}`;
+            btn.innerHTML = `<svg class="w-16 h-16" fill="currentColor"><use href="#${avatarId}"></use></svg>`;
+            btn.onclick = () => selectAvatar(playerName, avatarId);
+            avatarGrid.appendChild(btn);
+        });
+        
+        showModal('avatar');
+    }
+
+    // NUEVO: Lógica para seleccionar un avatar
+    function selectAvatar(playerName, avatarId) {
+        const player = getPlayerByName(playerName);
+        if (player) {
+            player.avatar = avatarId;
+            saveMasterPlayerList();
+            renderPlayers(); // Actualiza la lista de jugadores
+            hideAllModals();
+        }
+    }
     
     function showPlayerStats(playerName) {
+        // (Sin cambios)
         const player = getPlayerByName(playerName);
         if (!player) return;
         document.getElementById('stats-player-name').textContent = `Estadísticas de ${player.name}`;
@@ -175,17 +249,28 @@ document.addEventListener('DOMContentLoaded', () => {
         showModal('playerStats');
     }
     
-    // --- Lógica de Roles y Partida ---
+    // --- Lógica de Roles y Partida (MODIFICADA) ---
     
     /**
-     * Asigna roles a los jugadores de la partida actual.
-     * La lógica incluye la selección ponderada de impostores y la asignación aleatoria del resto de roles especiales.
-     * @returns {void}
+     * Asigna roles a los jugadores.
+     * MODIFICADO: Añadida la lógica del Modo Troll.
      */
     function assignRoles() {
         let playersToAssign = [...state.players];
         state.currentRound.assignments = [];
+
+        // NUEVO: Lógica del Modo Troll (15% de probabilidad)
+        if (state.gameSettings.useTrollMode && Math.random() < 0.15) {
+            state.currentRound.assignments = state.players.map(player => ({
+                player,
+                role: ROLES.IMPOSTOR,
+                word: '???'
+            }));
+            state.currentRound.assignments.sort(() => Math.random() - 0.5);
+            return; // Salta la asignación normal
+        }
         
+        // Asignación normal...
         let availableRoles = [];
         if (state.gameSettings.useJesterMode) availableRoles.push(ROLES.JESTER);
         if (state.gameSettings.useMimeMode) availableRoles.push(ROLES.MIME);
@@ -221,10 +306,16 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentRound.assignments.sort(() => Math.random() - 0.5);
     }
     
+    /**
+     * MODIFICADO: Muestra el rol y activa el pulso y los hápticos.
+     */
     function displayCurrentPlayerRole() {
         const assignment = state.currentRound.assignments[state.currentRound.currentPlayerIndex];
         document.getElementById('current-player-name').textContent = assignment.player.name;
         let title = '', description = '';
+        
+        // NUEVO: Limpia el pulso anterior
+        roleCardBack.classList.remove('impostor-pulse');
         
         const categoryInfo = `<br><span class="text-sm text-[var(--text-dark)]">Categoría: ${state.currentRound.category}</span>`;
 
@@ -232,27 +323,34 @@ document.addEventListener('DOMContentLoaded', () => {
             case ROLES.IMPOSTOR:
                 title = '🤫 ¡Eres IMPOSTOR!';
                 description = 'Descubre la palabra secreta.';
-                if(state.gameSettings.impostorCount > 0) soundManager.playRevealImpostor();
+                soundManager.playRevealImpostor();
+                hapticManager.vibrate(hapticManager.patterns.impostor); // Haptic impostor
+                roleCardBack.classList.add('impostor-pulse'); // Pulso impostor
                 break;
             case ROLES.JESTER:
                 title = '🃏 ¡Eres BUFÓN!';
                 description = '¡Consigue que te eliminen para ganar!';
+                hapticManager.vibrate(hapticManager.patterns.civil);
                 break;
             case ROLES.MIME:
                 title = '🤐 ¡Eres MIMO!';
                 description = `La palabra es <strong>${assignment.word}</strong>. ¡NO PUEDES HABLAR!${categoryInfo}`;
+                hapticManager.vibrate(hapticManager.patterns.civil);
                 break;
             case ROLES.SABOTEUR:
                 title = '💣 ¡Eres SABOTEADOR!';
                 description = `Tu palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                hapticManager.vibrate(hapticManager.patterns.civil);
                 break;
             case ROLES.DETECTIVE:
                 title = '🕵️ ¡Eres DETECTIVE!';
                 description = `La palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                hapticManager.vibrate(hapticManager.patterns.civil);
                 break;
             default: // INNOCENT
                 title = '😇 Eres INOCENTE';
                 description = `La palabra es: <strong>${assignment.word}</strong>.${categoryInfo}`;
+                hapticManager.vibrate(hapticManager.patterns.civil);
                 break;
         }
         roleTitle.innerHTML = title;
@@ -260,10 +358,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startGame() {
+        // (Sin cambios, excepto la clase del flip)
         const wordPool = getWordPool();
         if (wordPool.length === 0) { alert("Por favor, selecciona al menos una categoría con palabras."); return; }
         
-        roleCard.classList.remove('is-flipped');
+        // MODIFICADO: Asegura que la tarjeta esté en el estado correcto
+        roleCard.classList.remove('is-flipped', 'flip-out', 'flip-in');
         nextPlayerBtn.classList.add('hidden');
 
         const selectedCategories = Array.from(state.gameSettings.selectedCategories);
@@ -274,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentRound.isCustomCategory = !!getCustomLists().find(l => l.category === state.currentRound.category);
         state.currentRound.startingPlayer = state.players[Math.floor(Math.random() * state.players.length)];
         
-        if (state.gameSettings.useRoundEvents && Math.random() < 0.25) { // 25% chance
+        if (state.gameSettings.useRoundEvents && Math.random() < 0.25) { 
             const events = [{id: 'double_vote', text: `¡VOTO DOBLE! <strong>${state.players[Math.floor(Math.random()*state.players.length)].name}</strong> tiene dos votos esta ronda.`}];
             state.currentRound.activeEvent = events[0];
             roundEventText.innerHTML = state.currentRound.activeEvent.text;
@@ -289,12 +389,10 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('roleAssignment');
     }
     
-    // --- Lógica de Fin de Partida ---
+    // --- Lógica de Fin de Partida (MODIFICADA) ---
     
-    /**
-     * Muestra la pantalla de revelación sin votación.
-     */
     function revealRolesWithoutVoting() {
+        // (Sin cambios)
         state.players.forEach(p => {
             const player = getPlayerByName(p.name);
             if (player) {
@@ -302,19 +400,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         saveMasterPlayerList();
-        showRevealScreen();
+        showRevealScreen(); // Ahora llama a la nueva función de revelación
     }
 
+    /**
+     * MODIFICADO: Muestra la pantalla de revelación con el mosaico secuencial.
+     */
     function showRevealScreen() {
         winLossOverlay.classList.add('hidden');
+        revealGrid.innerHTML = ''; // Limpia el grid
+        
+        const assignments = state.currentRound.assignments;
+        
+        // 1. Mostrar la palabra
         revealWord.textContent = state.currentRound.word;
-        const impostors = state.currentRound.assignments.filter(a => a.role === ROLES.IMPOSTOR);
-        revealImpostorsList.innerHTML = impostors.map(a => `<li>${a.player.name}</li>`).join('');
+        // Comprobar si era Modo Troll
+        if (assignments.every(a => a.role === ROLES.IMPOSTOR)) {
+            revealWord.innerHTML = "¡TODOS ERAN IMPOSTORES! 🤡";
+        }
+
+        // 2. Crear todas las tarjetas (ocultas/no volteadas)
+        assignments.forEach(assignment => {
+            const cardWrapper = document.createElement('div');
+            // Usamos 'scene' para la perspectiva 3D de cada tarjeta
+            cardWrapper.className = 'scene w-full h-32'; 
+            cardWrapper.innerHTML = `
+                <div class="card w-full h-full reveal-card-item">
+                    <div class="card__face card__face--front flex flex-col items-center justify-center bg-[var(--bg-card)] rounded-lg border-2 border-dashed border-gray-600 p-2">
+                        <svg class="w-10 h-10 text-gray-500" fill="currentColor"><use href="#${assignment.player.avatar}"></use></svg>
+                        <span class="mt-1 text-sm font-bold text-gray-400 text-center">${assignment.player.name}</span>
+                    </div>
+                    <div class="card__face card__face--back flex flex-col items-center justify-center bg-[var(--bg-card)] rounded-lg border border-gray-700/50 p-2">
+                        <svg class="w-8 h-8 ${assignment.role === ROLES.IMPOSTOR ? 'text-[var(--role-impostor)]' : 'text-[var(--accent-primary)]'}" fill="currentColor"><use href="#${assignment.player.avatar}"></use></svg>
+                        <h3 class="font-bold text-sm text-center">${assignment.player.name}</h3>
+                        <p class="text-xs ${assignment.role === ROLES.IMPOSTOR ? 'text-[var(--role-impostor)] font-bold' : 'text-gray-300'}">
+                            ${assignment.role}
+                        </p>
+                    </div>
+                </div>
+            `;
+            revealGrid.appendChild(cardWrapper);
+        });
+
+        // 3. Voltearlas secuencialmente
+        const cardsToFlip = document.querySelectorAll('.reveal-card-item');
+        cardsToFlip.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('is-flipped');
+                soundManager.playCardFlip();
+                // Opcional: vibración de clic
+                // hapticManager.vibrate(hapticManager.patterns.click);
+            }, index * 200); // 200ms de retraso entre cada tarjeta
+        });
+
         showScreen('reveal');
     }
     
-    // --- Lógica de Logros ---
-    // La lógica de logros permanece, pero no se activará sin un ganador/perdedor.
+    // --- Lógica de Logros (Sin cambios) ---
     function checkAndUnlockAchievements(player, isWinner, role) {
         const context = {
             votesAgainst: state.currentRound.eliminatedPlayer === player.name ? 1 : 0,
@@ -343,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     }
     
-    // --- Lógica de Listas Personalizadas y Presets ---
+    // --- Lógica de Listas Personalizadas y Presets (Sin cambios) ---
     function getCustomLists() { return JSON.parse(localStorage.getItem('imposterWhoCustomLists') || '[]'); }
     function saveCustomLists(lists) { localStorage.setItem('imposterWhoCustomLists', JSON.stringify(lists)); }
     function getWordPool() {
@@ -389,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGameSettingsFromUI();
     }
 
-    // --- Renderizado de Modales ---
+    // --- Renderizado de Modales (Sin cambios) ---
     function renderRulesModal() {
         document.getElementById('rules-content').innerHTML = `
             <div class="space-y-3 text-[var(--text-dark)]">
@@ -416,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
     
-    // --- Inicialización ---
+    // --- Inicialización (Sin cambios) ---
     function init() {
         resetGameSettings();
         resetCurrentRound();
@@ -428,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('setup');
     }
     
-    // --- Event Listeners ---
+    // --- Event Listeners (MODIFICADOS) ---
     addPlayerBtn.addEventListener('click', () => addPlayerToGame(playerNameInput.value));
     playerNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addPlayerToGame(playerNameInput.value); });
     playersList.addEventListener('click', (e) => {
@@ -446,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     roleCard.addEventListener('click', () => {
         if(roleCard.classList.contains('is-flipped')) return;
         soundManager.playCardFlip();
-        roleCard.classList.add('is-flipped');
+        roleCard.classList.add('is-flipped'); // Volteo normal
 
         if (state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length - 1) {
             nextPlayerBtn.textContent = 'Empezar Partida';
@@ -456,19 +598,69 @@ document.addEventListener('DOMContentLoaded', () => {
         nextPlayerBtn.classList.remove('hidden');
     });
 
+    /**
+     * NUEVO: Función de volteo seguro (basada en el doc)
+     * [cite: 202, 203, 204, 205, 206, 207, 208, 209]
+     */
+    function safeFlipNext(cardEl, updateFn) {
+        let done = false;
+        
+        const finish = () => { 
+            if (done) return; // Previene doble ejecución
+            done = true; 
+            
+            updateFn(); // Actualiza el contenido de la tarjeta
+            
+            // Forzamos un reflujo (reflow) para que el navegador registre el contenido nuevo
+            // antes de aplicar la animación de entrada.
+            void cardEl.offsetWidth; 
+
+            cardEl.classList.remove('flip-out'); 
+            cardEl.classList.add('flip-in'); // Inicia la animación de entrada
+        };
+        
+        cardEl.classList.remove('is-flipped'); // Asegura que no esté volteada
+        cardEl.classList.remove('flip-in'); // Limpia clases anteriores
+        cardEl.classList.add('flip-out'); // Inicia la animación de salida
+        
+        const onEnd = () => { 
+            cardEl.removeEventListener('transitionend', onEnd); 
+            finish(); 
+        };
+        
+        cardEl.addEventListener('transitionend', onEnd, { once: true });
+        
+        // Fallback por si el evento no se dispara
+        setTimeout(finish, 850); // Damos 850ms (la anim dura 800ms)
+    }
+
+    /**
+     * MODIFICADO: El listener de 'next-player-btn' ahora usa safeFlipNext
+     */
     nextPlayerBtn.addEventListener('click', () => {
         soundManager.playClick();
+        hapticManager.vibrate(hapticManager.patterns.click);
         
         if (state.currentRound.currentPlayerIndex >= state.currentRound.assignments.length - 1) {
+            // Último jugador, empieza la partida
             startingPlayerName.textContent = state.currentRound.startingPlayer.name;
             showScreen('inGame');
         } else {
-            state.currentRound.currentPlayerIndex++;
-            roleCard.classList.remove('is-flipped');
+            // Pasa al siguiente jugador usando el volteo seguro
+            const updateFunction = () => {
+                state.currentRound.currentPlayerIndex++;
+                displayCurrentPlayerRole();
+            };
+            
+            // Oculta el botón inmediatamente
             nextPlayerBtn.classList.add('hidden');
-            setTimeout(displayCurrentPlayerRole, 400);
+            
+            // Inicia el volteo seguro
+            safeFlipNext(roleCard, updateFunction);
         }
     });
+    
+    // --- Listeners de Listas Personalizadas y Temas (Sin cambios) ---
     
     customListsBtn.addEventListener('click', () => showScreen('customLists'));
     backToSetupBtn.addEventListener('click', () => { renderCategories(); showScreen('setup'); });
@@ -501,7 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(e.target.value) loadPreset(e.target.value);
     });
 
-    // --- Lógica de Temas ---
     function applyTheme(theme) {
         document.body.className = 'min-h-screen flex items-center justify-center p-4';
         if (theme !== 'default') document.body.classList.add(theme);
@@ -554,8 +745,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('setup');
     });
     
-    // Función para seleccionar jugadores ponderados
     function selectWeightedPlayers(players, count) {
+        // (Sin cambios)
         const selectedPlayers = [];
         let selectionPool = players.map(p => {
             const masterP = getPlayerByName(p.name);
